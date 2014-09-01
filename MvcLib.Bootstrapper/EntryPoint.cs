@@ -33,7 +33,7 @@ namespace MvcLib.Bootstrapper
         public static void PreStart()
         {
             var executingAssembly = Assembly.GetExecutingAssembly();
-            Trace.TraceInformation("Entry: {0}", executingAssembly.GetName().Name);
+            Trace.TraceInformation("Entry Assembly: {0}", executingAssembly.GetName().Name);
 
             if (Config.IsInDebugMode)
             {
