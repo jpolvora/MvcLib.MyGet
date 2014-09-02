@@ -32,19 +32,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcLib.HttpModules", "MvcLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcLib.Common.Mvc", "MvcLib.Common.Mvc\MvcLib.Common.Mvc.csproj", "{4550BC11-B931-4872-87FD-726957542EFA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{74470227-5CEB-46BD-B378-62546360513C}"
-	ProjectSection(SolutionItems) = preProject
-		compiled_libs\MvcLib.Bootstrapper.dll = compiled_libs\MvcLib.Bootstrapper.dll
-		compiled_libs\MvcLib.Common.dll = compiled_libs\MvcLib.Common.dll
-		compiled_libs\MvcLib.Common.Mvc.dll = compiled_libs\MvcLib.Common.Mvc.dll
-		compiled_libs\MvcLib.CustomVPP.dll = compiled_libs\MvcLib.CustomVPP.dll
-		compiled_libs\MvcLib.DbFileSystem.dll = compiled_libs\MvcLib.DbFileSystem.dll
-		compiled_libs\MvcLib.FsDump.dll = compiled_libs\MvcLib.FsDump.dll
-		compiled_libs\MvcLib.HttpModules.dll = compiled_libs\MvcLib.HttpModules.dll
-		compiled_libs\MvcLib.Kompiler.dll = compiled_libs\MvcLib.Kompiler.dll
-		compiled_libs\MvcLib.PluginLoader.dll = compiled_libs\MvcLib.PluginLoader.dll
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcLib.FsDump", "MvcLib.FsDump\MvcLib.FsDump.csproj", "{3971D9AD-BB07-4675-BABF-471BE04E2490}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7AD1F491-7ACE-4860-A2A4-9BC8C4D0DE5F}"
