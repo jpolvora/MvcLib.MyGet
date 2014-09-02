@@ -1,10 +1,8 @@
-[![jpolvora MyGet Build Status](https://www.myget.org/BuildSource/Badge/jpolvora?identifier=ea5933fc-2ee2-467e-9f96-e82342619090)](https://www.myget.org/)
-
 MvcLib
 ======
-Use subtree!!!
+How to use subtree
 ```
-git remote add --fetch MvcLib https://jpolvora@bitbucket.org/jpolvora/mvcfromdb.git
+git remote add --fetch MvcLib https://jpolvora@bitbucket.org/jpolvora/mvclib.git
 
 git subtree add --prefix=MvcLib MvcLib master --squash
 
@@ -13,21 +11,7 @@ git fetch MvcLib master
 git subtree pull --prefix=MvcLib MvcLib master --squash
 
 //push back to MvcLib (fork)
-git remote add MvcLib_Push https://jpolvora@bitbucket.org/jpolvora/mvcfromdb.git
-git subtree push --prefix=MvcLib MvcLib_Push master
-```
-
-```
-git remote add --fetch MvcLib https://jpolvora@bitbucket.org/jpolvora/mvcfromdb.git
-
-git subtree add --prefix=MvcLib MvcLib master --squash
-
-//update from MvcLib
-git fetch MvcLib master
-git subtree pull --prefix=MvcLib MvcLib master --squash
-
-//push back to MvcLib (fork)
-git remote add MvcLib_Push https://jpolvora@bitbucket.org/jpolvora/mvcfromdb.git
+git remote add MvcLib_Push https://jpolvora@bitbucket.org/jpolvora/mvclib.git
 git subtree push --prefix=MvcLib MvcLib_Push master
 ```
 
