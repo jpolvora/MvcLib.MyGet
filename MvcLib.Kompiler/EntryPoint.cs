@@ -57,7 +57,7 @@ namespace MvcLib.Kompiler
                 catch (Exception ex)
                 {
                     msg = ex.Message;
-                    Trace.TraceError("Erro durante a compilação do projeto no banco de dados. \r\n" + ex.Message);
+                    Trace.TraceInformation("Erro durante a compilação do projeto no banco de dados. \r\n" + ex.Message);
                 }
 
                 if (string.IsNullOrWhiteSpace(msg) && buffer.Length > 0)

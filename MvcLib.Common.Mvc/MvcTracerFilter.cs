@@ -13,7 +13,7 @@ namespace MvcLib.Common.Mvc
 
         public void OnException(ExceptionContext filterContext)
         {
-            Trace.TraceError("[MvcTracerFilter]:[OnException]: {0}", filterContext.Exception);
+            Trace.TraceInformation("[MvcTracerFilter]:[OnException]: {0}", filterContext.Exception);
         }
 
         public void OnAuthentication(AuthenticationContext filterContext)
