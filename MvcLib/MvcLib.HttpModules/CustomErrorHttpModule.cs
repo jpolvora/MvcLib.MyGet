@@ -54,9 +54,14 @@ namespace MvcLib.HttpModules
             }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
 =======
 >>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
+=======
+            Trace.TraceError("[CustomError]: Ocorreu uma exceção: {0}", exception.Message);
+
+>>>>>>> 9ec8d271c7c9e33ba29c606f6c8a96ba9a0f331d
             var statusCode = response.StatusCode;
             var httpException = exception as HttpException;
             if (httpException != null)
@@ -115,7 +120,7 @@ namespace MvcLib.HttpModules
             response.StatusCode = statusCode;
 =======
             server.ClearError();
-            response.ClearContent();
+            response.Clear();
             response.StatusCode = statusCode;
             response.StatusDescription = exception.Message;
 
@@ -152,7 +157,13 @@ namespace MvcLib.HttpModules
             Trace.TraceInformation("[CustomError]: Completing response.");
 >>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
 
-            application.CompleteRequest();
+            if (statusCode == 500)
+            {
+                LogEvent.Raise(exception.Message, exception);
+            }
+
+            application.CompleteRequest(); //não imprime o resultado
+            //response.End();
         }
 
         private static void RenderView(string errorViewPath, ErrorModel model, HttpResponse response)
