@@ -111,7 +111,7 @@ NoteNote	The MapRequestHandler, LogRequest, and PostLogRequest events are suppor
                 return;
 
             var rid = _application.Context.Items[RequestId];
-            Trace.TraceInformation("[{0}]:[{1}] Evento {2}, Handler: [{3}], User: {4}, Memory: {5}", _application.Context.CurrentNotification, rid, eventName, _application.Context.CurrentHandler, _application.User != null ? _application.User.Identity.Name : "-", GC.GetTotalMemory(false));
+            Trace.TraceInformation("[{0}]:[{1}] Evento {2}, Handler: [{3}], Filter: {4}, User: {5}, Memory: {6}", _application.Context.CurrentNotification, rid, eventName, _application.Context.CurrentHandler, _application.Context.Response.Filter, _application.User != null ? _application.User.Identity.Name : "-", GC.GetTotalMemory(false));
 
             //case RequestNotification.PreExecuteRequestHandler:
             if (RequestNotification.PreExecuteRequestHandler == _application.Context.CurrentNotification)
@@ -182,7 +182,7 @@ NoteNote	The MapRequestHandler, LogRequest, and PostLogRequest events are suppor
             Trace.Flush();
 
             var rid = _application.Context.Items[RequestId];
-            Trace.TraceInformation("[{0}]:[{1}] Evento {2}, Handler: [{3}], User: {4}", _application.Context.CurrentNotification, rid, "Error", _application.Context.CurrentHandler, _application.User != null ? _application.User.Identity.Name : "-");
+            Trace.TraceInformation("[{0}]:[{1}] Evento {2}, Handler: [{3}], User: {4}", _application.Context.CurrentNotification, rid, "Error: ", _application.Context.CurrentHandler, _application.User != null ? _application.User.Identity.Name : "-");
         }
 
         private void StopTimer()

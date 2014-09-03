@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -17,7 +18,7 @@ namespace MvcLib.HttpModules
         {
             var application = (HttpApplication)sender;
             var context = application.Context;
-            
+
             //se não foi especificado um cache.
             //if (context.Response.Headers.AllKeys.Contains("Cache-Control"))
             //    return;
@@ -26,7 +27,8 @@ namespace MvcLib.HttpModules
 
             if (!File.Exists(file))
                 return;
-            
+
+            Trace.TraceInformation("[SetCacheHttpModule]: Setting cache/response Header for '{0}'", file);
 
             var response = context.Response;
 
