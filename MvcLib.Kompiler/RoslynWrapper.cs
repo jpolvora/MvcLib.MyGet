@@ -61,7 +61,7 @@ namespace MvcLib.Kompiler
             }
         }
 
-        public static string CreateSolutionAndCompile(Dictionary<string, byte[]> files, out byte[] buffer)
+        public static string CreateSolutionAndCompile(Dictionary<string, string> files, out byte[] buffer)
         {
             var project = CreateProject();
 
@@ -71,7 +71,7 @@ namespace MvcLib.Kompiler
                 var p = VirtualPathUtility.ToAbsolute(path);
                 var folders = p.Split(new[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
 
-                var csDoc = project.AddDocument(file.Key, Encoding.UTF8.GetString(file.Value), folders);
+                var csDoc = project.AddDocument(file.Key, file.Value, folders);
                 project = csDoc.Project;
             }
 

@@ -17,8 +17,15 @@ namespace MvcLib.Kompiler
             try
             {
                 var dict = LoadSourceCodeFromDb();
-                result = RoslynWrapper.CreateSolutionAndCompile(dict, out buffer);
 
+                if (Config.ValueOrDefault("UseRoslyn", false))
+                {
+                    result = RoslynWrapper.CreateSolutionAndCompile(dict, out buffer);
+                }
+                else
+                {
+                    result = CodeDomWrapper.CompileFromStringArray(dict, out buffer);
+                }
                 if (!String.IsNullOrEmpty(result)) return result;
 
                 if (!Config.ValueOrDefault("KompilerForceRecompilation", false))
@@ -39,9 +46,9 @@ namespace MvcLib.Kompiler
             return result;
         }
 
-        internal static Dictionary<string, byte[]> LoadSourceCodeFromDb()
+        internal static Dictionary<string, string> LoadSourceCodeFromDb()
         {
-            var dict = new Dictionary<string, byte[]>();
+            var dict = new Dictionary<string, string>();
 
             //procurar por todos os arquivos CS no DbFileSystem
             using (var ctx = new DbFileContext())
@@ -56,7 +63,7 @@ namespace MvcLib.Kompiler
                     if (string.IsNullOrWhiteSpace(dbFile.Texto))
                         continue;
 
-                    dict.Add(dbFile.VirtualPath, Encoding.UTF8.GetBytes(dbFile.Texto));
+                    dict.Add(dbFile.VirtualPath, dbFile.Texto);
                 }
             }
 

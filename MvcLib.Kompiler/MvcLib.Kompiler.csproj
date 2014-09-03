@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeDomWrapper.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="KompilerDbService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
