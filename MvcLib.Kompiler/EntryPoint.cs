@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using MvcLib.Common;
 using Roslyn.Compilers;
@@ -14,13 +15,24 @@ namespace MvcLib.Kompiler
 
         private static bool _initialized;
 
-        internal static List<MetadataReference> DefaultReferences = new List<MetadataReference>
+        internal static List<string> CodeDomReferences = new List<string>()
+        {
+                    typeof (object).Assembly.Location, //System
+                    typeof (Enumerable).Assembly.Location, //System.Core.dll
+                    typeof(System.Data.DbType).Assembly.Location, //System.Data         
+                    typeof(Microsoft.CSharp.RuntimeBinder.Binder).Assembly.Location, //Microsoft.CSharp
+                    typeof(System.Web.HttpApplication).Assembly.Location,
+                    typeof(System.ComponentModel.DataAnnotations.DataType).Assembly.Location,
+                    typeof(DbContext).Assembly.Location,
+                    typeof(CodeDomWrapper).Assembly.Location
+        };
+
+        internal static List<MetadataReference> RoslynReferences = new List<MetadataReference>
         {
             MetadataReference. CreateAssemblyReference("mscorlib"),
             MetadataReference.CreateAssemblyReference("System"),
             MetadataReference.CreateAssemblyReference("System.Core"),
             MetadataReference.CreateAssemblyReference("System.Data"),
-            MetadataReference.CreateAssemblyReference("System.Linq"),
             MetadataReference.CreateAssemblyReference("Microsoft.CSharp"),
             MetadataReference.CreateAssemblyReference("System.Web"),
             MetadataReference.CreateAssemblyReference("System.ComponentModel.DataAnnotations"),
@@ -39,7 +51,8 @@ namespace MvcLib.Kompiler
 
             foreach (var type in types)
             {
-                DefaultReferences.Add(new MetadataFileReference(type.Assembly.Location));
+                CodeDomReferences.Add(type.Assembly.Location);
+                RoslynReferences.Add(new MetadataFileReference(type.Assembly.Location));
             }
         }
 
@@ -47,7 +60,7 @@ namespace MvcLib.Kompiler
         {
             foreach (var assembly in assemblies)
             {
-                DefaultReferences.Add(new MetadataFileReference(assembly.Location));
+                RoslynReferences.Add(new MetadataFileReference(assembly.Location));
             }
         }
 
@@ -58,7 +71,7 @@ namespace MvcLib.Kompiler
 
             _initialized = true;
 
-            using (DisposableTimer.StartNew("Roslyn Compilation"))
+            using (DisposableTimer.StartNew("Dynamic Compilation"))
             {
                 byte[] buffer;
                 string msg;
@@ -66,12 +79,12 @@ namespace MvcLib.Kompiler
                 {
                     var localRootFolder = Config.ValueOrDefault("DumpToLocalFolder", "~/dbfiles");
                     Trace.TraceInformation("Compiling from Local File System: {0}", localRootFolder);
-                    msg = RoslynWrapper.CreateSolutionAndCompile(localRootFolder, out buffer);
+                    msg = KompilerDbService.TryCreateAndSaveAssemblyFromDbFiles(localRootFolder, out buffer, localRootFolder);
                 }
                 else
                 {
                     Trace.TraceInformation("Compiling from DB");
-                    msg = KompilerDbService.TryCreateAndSaveAssemblyFromDbFiles(CompiledAssemblyName, out buffer);
+                    msg = KompilerDbService.TryCreateAndSaveAssemblyFromDbFiles(CompiledAssemblyName, out buffer, null);
                 }
 
                 if (string.IsNullOrWhiteSpace(msg) && buffer.Length > 0)

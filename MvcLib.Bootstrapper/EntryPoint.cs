@@ -101,7 +101,7 @@ namespace MvcLib.Bootstrapper
 
                 if (Config.ValueOrDefault("Kompiler", false))
                 {
-                    if (Config.ValueOrDefault("KompilerForceRecompilation", false))
+                    if (Config.ValueOrDefault("Kompiler:ForceRecompilation", false))
                     {
                         //se forçar a recompilação, remove o assembly existente.
                         Kompiler.KompilerDbService.RemoveExistingCompiledAssemblyFromDb();

@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="CodeDomWrapper.cs" />
     <Compile Include="EntryPoint.cs" />
+    <Compile Include="IKompiler.cs" />
     <Compile Include="KompilerDbService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RoslynWrapper.cs" />

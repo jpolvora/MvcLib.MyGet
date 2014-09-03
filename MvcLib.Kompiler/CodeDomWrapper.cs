@@ -3,33 +3,37 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
+using System.Web.Hosting;
 using Microsoft.CSharp;
+using MvcLib.Common;
 
 namespace MvcLib.Kompiler
 {
-    public class CodeDomWrapper
+    public class CodeDomWrapper : IKompiler
     {
-        public static string CompileFromStringArray(Dictionary<string, string> sourceFiles, out byte[] buffer)
+        public string CompileFromSource(Dictionary<string, string> files, out byte[] buffer)
         {
-            if (sourceFiles == null)
+            if (files == null)
                 throw new ArgumentNullException("sourceFiles");
+
+            var output = Path.Combine(Path.GetTempPath(), EntryPoint.CompiledAssemblyName + ".dll");
 
             CodeDomProvider codeDomProvider = new CSharpCodeProvider();
             var compilerParameters = new CompilerParameters
             {
-                OutputAssembly = EntryPoint.CompiledAssemblyName + ".dll",
+                OutputAssembly = output,
                 GenerateExecutable = false,
-                GenerateInMemory = true,
+                GenerateInMemory = false,
                 IncludeDebugInformation = false,
-                ReferencedAssemblies =
-                {
-                    typeof (object).Assembly.Location,
-                    typeof (Enumerable).Assembly.Location
-                }
             };
-            var src = sourceFiles.Select(s => s.Value).ToArray();
+
+            foreach (var codeDomReference in EntryPoint.CodeDomReferences)
+            {
+                compilerParameters.ReferencedAssemblies.Add(codeDomReference);
+            }
+
+            var src = files.Select(s => s.Value).ToArray();
 
             CompilerResults result = codeDomProvider.CompileAssemblyFromSource(compilerParameters, src);
 
@@ -49,6 +53,31 @@ namespace MvcLib.Kompiler
             buffer = File.ReadAllBytes(file);
 
             return string.Empty;
+        }
+
+        public string CompileFromFolder(string folder, out byte[] buffer)
+        {
+            var dirInfo = new DirectoryInfo(HostingEnvironment.MapPath(folder));
+            if (!dirInfo.Exists)
+            {
+                buffer = new byte[0];
+                return "Pasta {0} não encontada".Fmt(folder);
+            }
+
+            Dictionary<string, string> source = new Dictionary<string, string>();
+
+            foreach (var file in dirInfo.EnumerateFileSystemInfos("*.cs", SearchOption.AllDirectories))
+            {
+                var src = File.ReadAllText(file.FullName);
+                source.Add(file.Name, src);
+            }
+
+            return CompileFromSource(source, out buffer);
+        }
+
+        public string CompileString(string text, out byte[] buffer)
+        {
+            throw new NotImplementedException();
         }
     }
 }

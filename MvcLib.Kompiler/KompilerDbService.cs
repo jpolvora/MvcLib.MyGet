@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using MvcLib.Common;
 using MvcLib.DbFileSystem;
 
@@ -11,24 +10,32 @@ namespace MvcLib.Kompiler
 {
     public class KompilerDbService
     {
-        internal static string TryCreateAndSaveAssemblyFromDbFiles(string assName, out byte[] buffer)
+        internal static string TryCreateAndSaveAssemblyFromDbFiles(string assName, out byte[] buffer, string folderName = "")
         {
-            string result = "";
+            string result;
             try
             {
-                var dict = LoadSourceCodeFromDb();
+                IKompiler kompiler;
 
-                if (Config.ValueOrDefault("UseRoslyn", false))
+                if (Config.ValueOrDefault("Kompiler:UseRoslyn", false))
                 {
-                    result = RoslynWrapper.CreateSolutionAndCompile(dict, out buffer);
+                    kompiler = new RoslynWrapper();
                 }
                 else
                 {
-                    result = CodeDomWrapper.CompileFromStringArray(dict, out buffer);
+                    kompiler = new CodeDomWrapper();
                 }
+
+                if (string.IsNullOrEmpty(folderName))
+                {
+                    var dict = LoadSourceCodeFromDb();
+                    result = kompiler.CompileFromSource(dict, out buffer);
+                }
+                else result = kompiler.CompileFromFolder(folderName, out buffer);
+
                 if (!String.IsNullOrEmpty(result)) return result;
 
-                if (!Config.ValueOrDefault("KompilerForceRecompilation", false))
+                if (!Config.ValueOrDefault("Kompiler:ForceRecompilation", false))
                 {
                     //só salva no banco se compilação forçada for False
                     SaveCompiledCustomAssembly(assName, buffer);

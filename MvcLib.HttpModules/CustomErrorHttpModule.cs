@@ -91,7 +91,7 @@ namespace MvcLib.HttpModules
                 LogEvent.Raise(exception.Message, exception);
             }
 
-            application.CompleteRequest(); //não imprime o resultado
+            //application.CompleteRequest(); //não imprime o resultado
             //response.End();
         }
 
