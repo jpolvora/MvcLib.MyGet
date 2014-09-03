@@ -8,7 +8,10 @@ namespace MvcLib.Common.Mvc
     public static class RequestExtensions
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
         public static bool IsAjaxRequest(this HttpRequest request)
         {
             if (request == null)
@@ -18,7 +21,10 @@ namespace MvcLib.Common.Mvc
 
             return (request["X-Requested-With"] == "XMLHttpRequest") || ((request.Headers != null) && (request.Headers["X-Requested-With"] == "XMLHttpRequest"));
         }
+<<<<<<< HEAD
 >>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
+=======
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
 
         public static string ToPublicUrl(this HttpContextBase context, Uri relativeUri, string scheme)
         {

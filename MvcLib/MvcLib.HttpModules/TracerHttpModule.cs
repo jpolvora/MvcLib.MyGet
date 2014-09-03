@@ -5,9 +5,13 @@ using System.Web;
 using System.Web.Mvc;
 using MvcLib.Common;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 using MvcLib.Common.Mvc;
 >>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
+=======
+using MvcLib.Common.Mvc;
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
 
 namespace MvcLib.HttpModules
 {
@@ -142,10 +146,14 @@ NoteNote	The MapRequestHandler, LogRequest, and PostLogRequest events are suppor
             context.Items[Stopwatch] = System.Diagnostics.Stopwatch.StartNew();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             bool isAjax = new HttpContextWrapper(context).Request.IsAjaxRequest();
 =======
             bool isAjax = context.Request.IsAjaxRequest();
 >>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
+=======
+            bool isAjax = context.Request.IsAjaxRequest();
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
 
             if (isAjax)
             {
@@ -153,13 +161,19 @@ NoteNote	The MapRequestHandler, LogRequest, and PostLogRequest events are suppor
             }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
             if (context.Items.Contains("IIS_WasUrlRewritten"))
             {
                 Trace.TraceWarning("Url was rewriten {0} to {1}", context.Request.RawUrl, context.Request.Url);
             }
 
+<<<<<<< HEAD
 >>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
+=======
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
             Trace.TraceInformation("[BeginRequest]:[{0}] {1} {2} {3}", rid, context.Request.HttpMethod, context.Request.RawUrl, isAjax ? "Ajax: True" : "");
         }
 
@@ -179,10 +193,14 @@ NoteNote	The MapRequestHandler, LogRequest, and PostLogRequest events are suppor
             if (context.Request.IsAuthenticated && context.Response.StatusCode == 403)
             {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 bool isAjax = new HttpContextWrapper(context).Request.IsAjaxRequest();
 =======
                 bool isAjax = context.Request.IsAjaxRequest();
 >>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
+=======
+                bool isAjax = context.Request.IsAjaxRequest();
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
                 if (!isAjax)
                 {
                     context.Response.Write("Você está autenticado mas não possui permissões para acessar este recurso");

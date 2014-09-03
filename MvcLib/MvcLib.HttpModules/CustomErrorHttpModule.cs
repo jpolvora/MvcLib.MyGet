@@ -35,19 +35,28 @@ namespace MvcLib.HttpModules
             var server = application.Server;
             var response = application.Response;
 <<<<<<< HEAD
+<<<<<<< HEAD
             var exception = server.GetLastError();
 
 =======
             var request = application.Request;
             var exception = server.GetLastError();
 
+=======
+            var request = application.Request;
+            var exception = server.GetLastError();
+
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
             if (exception == null)
             {
                 Trace.TraceWarning("Erro desconhecido. Url: {0}", request.Url);
                 return;
             }
 
+<<<<<<< HEAD
 >>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
+=======
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
             var statusCode = response.StatusCode;
             var httpException = exception as HttpException;
             if (httpException != null)
@@ -55,6 +64,7 @@ namespace MvcLib.HttpModules
                 statusCode = httpException.GetHttpCode();
             }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
             if (application.Context.Handler != null)
             {
@@ -66,28 +76,41 @@ namespace MvcLib.HttpModules
                 }
             }
 
+=======
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
             server.ClearError();
-            response.Clear();
+            response.ClearContent();
+            response.StatusCode = statusCode;
+            response.StatusDescription = exception.Message;
 
-            var model = new ErrorModel()
+            //Prevents customError behavior when the request is determined to be an AJAX request.
+            if (request.IsAjaxRequest())
             {
-                Message = exception != null ? exception.Message : "Erro: " + statusCode,
-                FullMessage = exception.LoopException(),
-                StackTrace = exception != null ? exception.StackTrace : "",
-                Url = application.Request.RawUrl,
-                StatusCode = statusCode
-            };
-
-            bool useController = !string.IsNullOrWhiteSpace(_errorController);
-            if (useController)
-            {
-                RenderController(application.Context, _errorController, model);
+                response.Write(string.Format("<html><body><h1>{0} {1}</h1></body></html>", statusCode, exception.Message));
             }
             else
             {
-                RenderView(_errorViewPath, model, response);
+                var model = new ErrorModel()
+                {
+                    Message = exception.Message,
+                    FullMessage = exception.LoopException(),
+                    StackTrace = exception.StackTrace,
+                    Url = application.Request.RawUrl,
+                    StatusCode = statusCode
+                };
+
+                bool useController = !string.IsNullOrWhiteSpace(_errorController);
+                if (useController)
+                {
+                    RenderController(application.Context, _errorController, model);
+                }
+                else
+                {
+                    RenderView(_errorViewPath, model, response);
+                }
             }
 
+<<<<<<< HEAD
             Trace.TraceInformation("[CustomError]: Will end response now (avoid Transfer Handler)");
             response.StatusCode = statusCode;
 =======
@@ -125,6 +148,9 @@ namespace MvcLib.HttpModules
 
             Trace.TraceInformation("[CustomError]: Completing response.");
 >>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
+=======
+            Trace.TraceInformation("[CustomError]: Completing response.");
+>>>>>>> 5fa1022bb00c6386a1fb9a2ff8c149a6545ff7f0
 
             application.CompleteRequest();
         }
