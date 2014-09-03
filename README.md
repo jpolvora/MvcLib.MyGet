@@ -8,3 +8,9 @@ MvcLib.MyGet
 This repository contains a main project (Packager) that references MvcLib projects (subtree) in order to build a NuGet package.
 
 MyGet will build and publish the final package.
+
+
+https://www.myget.org/BuildSource/List/jpolvora
+
+
+https://www.myget.org/feed/jpolvora/package/MvcLib.Nuget
