@@ -7,6 +7,15 @@ namespace MvcLib.Common.Mvc
 {
     public static class RequestExtensions
     {
+        public static bool IsAjaxRequest(this HttpRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+
+            return (request["X-Requested-With"] == "XMLHttpRequest") || ((request.Headers != null) && (request.Headers["X-Requested-With"] == "XMLHttpRequest"));
+        }
 
         public static string ToPublicUrl(this HttpContextBase context, Uri relativeUri, string scheme)
         {

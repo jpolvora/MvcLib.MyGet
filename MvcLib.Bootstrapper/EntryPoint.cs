@@ -66,6 +66,7 @@ namespace MvcLib.Bootstrapper
                 {
                     DbFileContext.Initialize();
                 }
+
                 //plugin loader deve ser utilizado se dump to local = true ou se utilizar o custom vpp
                 if (Config.ValueOrDefault("PluginLoader", false))
                 {
