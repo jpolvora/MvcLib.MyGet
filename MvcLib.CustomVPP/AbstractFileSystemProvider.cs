@@ -53,7 +53,7 @@ namespace MvcLib.CustomVPP
             }
             catch (Exception ex)
             {
-                Trace.TraceError("IsVirtualDir", ex);
+                Trace.TraceInformation("IsVirtualDir", ex);
             }
 
             return false;
@@ -98,7 +98,7 @@ namespace MvcLib.CustomVPP
             }
             catch (Exception ex)
             {
-                Trace.TraceError("IsVirtualFile", ex);
+                Trace.TraceInformation("IsVirtualFile", ex);
             }
 
             return false;

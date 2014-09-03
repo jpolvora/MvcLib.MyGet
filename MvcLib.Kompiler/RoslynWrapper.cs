@@ -12,7 +12,7 @@ using Roslyn.Services;
 
 namespace MvcLib.Kompiler
 {
-    public class RoslynWrapper
+    public class RoslynWrapper : IKompiler
     {
         static IProject CreateProject()
         {
@@ -20,7 +20,7 @@ namespace MvcLib.Kompiler
                 .AddCSharpProject(EntryPoint.CompiledAssemblyName, EntryPoint.CompiledAssemblyName + ".dll")
                 .Solution.Projects.Single()
                 .UpdateParseOptions(new ParseOptions().WithLanguageVersion(LanguageVersion.CSharp5))
-                .AddMetadataReferences(EntryPoint.DefaultReferences)
+                .AddMetadataReferences(EntryPoint.RoslynReferences)
                 .UpdateCompilationOptions(new CompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             return project;
@@ -61,7 +61,38 @@ namespace MvcLib.Kompiler
             }
         }
 
-        public static string CreateSolutionAndCompile(Dictionary<string, byte[]> files, out byte[] buffer)
+        static String TryCompile(string myCode, string assemblyName, out MemoryStream stream, OutputKind kind = OutputKind.ConsoleApplication)
+        {
+
+            // The MyClassInAString is where your code goes
+            var syntaxTree = SyntaxTree.ParseText(myCode);
+
+            // Use Roslyn to compile the code into a DLL
+            var compiledCode = Compilation.Create(assemblyName,
+                new CompilationOptions(kind),
+                new[] { syntaxTree },
+                EntryPoint.RoslynReferences
+                );
+
+            //return buffer;
+            stream = new MemoryStream();
+
+
+            StringBuilder sb = new StringBuilder();
+
+            var compileResult = compiledCode.Emit(stream);
+            if (!compileResult.Success)
+            {
+                foreach (var diagnostic in compileResult.Diagnostics)
+                {
+                    sb.AppendLine(diagnostic.Info.GetMessage());
+                }
+            }
+            stream.Flush();
+            return sb.ToString();
+        }
+
+        public string CompileFromSource(Dictionary<string, string> files, out byte[] buffer)
         {
             var project = CreateProject();
 
@@ -71,14 +102,14 @@ namespace MvcLib.Kompiler
                 var p = VirtualPathUtility.ToAbsolute(path);
                 var folders = p.Split(new[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
 
-                var csDoc = project.AddDocument(file.Key, Encoding.UTF8.GetString(file.Value), folders);
+                var csDoc = project.AddDocument(file.Key, file.Value, folders);
                 project = csDoc.Project;
             }
 
             return Compile(project, out buffer);
         }
 
-        public static string CreateSolutionAndCompile(string folder, out byte[] buffer)
+        public string CompileFromFolder(string folder, out byte[] buffer)
         {
             var dirInfo = new DirectoryInfo(HostingEnvironment.MapPath(folder));
             if (!dirInfo.Exists)
@@ -100,36 +131,12 @@ namespace MvcLib.Kompiler
             return Compile(project, out buffer);
         }
 
-        public static String TryCompile(string myCode, string assemblyName, out MemoryStream stream, OutputKind kind = OutputKind.ConsoleApplication)
+        public string CompileString(string text, out byte[] buffer)
         {
-
-            // The MyClassInAString is where your code goes
-            var syntaxTree = SyntaxTree.ParseText(myCode);
-
-            // Use Roslyn to compile the code into a DLL
-            var compiledCode = Compilation.Create(assemblyName,
-                new CompilationOptions(kind),
-                new[] { syntaxTree },
-                EntryPoint.DefaultReferences
-                );
-
-            //return buffer;
-            stream = new MemoryStream();
-
-
-            StringBuilder sb = new StringBuilder();
-
-            var compileResult = compiledCode.Emit(stream);
-            if (!compileResult.Success)
-            {
-                foreach (var diagnostic in compileResult.Diagnostics)
-                {
-                    sb.AppendLine(diagnostic.Info.GetMessage());
-                }
-            }
-            stream.Flush();
-            return sb.ToString();
+            MemoryStream ms;
+            string result = TryCompile(text, EntryPoint.CompiledAssemblyName, out ms, OutputKind.DynamicallyLinkedLibrary);
+            buffer = ms.GetBuffer();
+            return result;
         }
-
     }
 }

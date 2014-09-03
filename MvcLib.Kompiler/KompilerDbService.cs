@@ -3,45 +3,15 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using MvcLib.Common;
 using MvcLib.DbFileSystem;
 
 namespace MvcLib.Kompiler
 {
     public class KompilerDbService
     {
-        internal static string TryCreateAndSaveAssemblyFromDbFiles(string assName, out byte[] buffer)
+        internal static Dictionary<string, string> LoadSourceCodeFromDb()
         {
-            string result = "";
-            try
-            {
-                var dict = LoadSourceCodeFromDb();
-                result = RoslynWrapper.CreateSolutionAndCompile(dict, out buffer);
-
-                if (!String.IsNullOrEmpty(result)) return result;
-
-                if (!Config.ValueOrDefault("KompilerForceRecompilation", false))
-                {
-                    //só salva no banco se compilação forçada for False
-                    SaveCompiledCustomAssembly(assName, buffer);
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result = ex.Message;
-                Trace.TraceError("Erro durante a compilação do projeto no banco de dados. \r\n" + ex.Message);
-            }
-
-            buffer = new byte[0];
-            return result;
-        }
-
-        internal static Dictionary<string, byte[]> LoadSourceCodeFromDb()
-        {
-            var dict = new Dictionary<string, byte[]>();
+            var dict = new Dictionary<string, string>();
 
             //procurar por todos os arquivos CS no DbFileSystem
             using (var ctx = new DbFileContext())
@@ -56,7 +26,7 @@ namespace MvcLib.Kompiler
                     if (string.IsNullOrWhiteSpace(dbFile.Texto))
                         continue;
 
-                    dict.Add(dbFile.VirtualPath, Encoding.UTF8.GetBytes(dbFile.Texto));
+                    dict.Add(dbFile.VirtualPath, dbFile.Texto);
                 }
             }
 
