@@ -41,7 +41,7 @@ namespace MvcLib.PluginLoader
             }
             catch (Exception ex)
             {
-                Trace.TraceError("Error reading probing privatePath in web.config. {0}", ex.Message);
+                Trace.TraceInformation("Error reading probing privatePath in web.config. {0}", ex.Message);
             }
 
             PluginFolder = new DirectoryInfo(HostingEnvironment.MapPath(privatePath));
@@ -136,7 +136,7 @@ namespace MvcLib.PluginLoader
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.Message);
+                Trace.TraceInformation(ex.Message);
             }
 
             return result;
@@ -196,7 +196,7 @@ namespace MvcLib.PluginLoader
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.Message);
+                Trace.TraceInformation(ex.Message);
             }
         }
 

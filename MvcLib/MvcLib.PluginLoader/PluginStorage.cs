@@ -25,7 +25,8 @@ namespace MvcLib.PluginLoader
             catch (Exception ex)
             {
                 var msg = "ERRO LOADING ASSEMBLY: {0}: {1}".Fmt(fileName, ex);
-                Trace.TraceError(msg);
+                Trace.TraceInformation(msg);
+                LogEvent.Raise(ex.Message, ex);
             }
         }
 

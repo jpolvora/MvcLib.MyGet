@@ -88,7 +88,7 @@ namespace MvcLib.FsDump
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError(ex.Message);
+                    Trace.TraceInformation(ex.Message);
                 }
             }
 
@@ -104,7 +104,7 @@ namespace MvcLib.FsDump
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.Message);
+                Trace.TraceInformation(ex.Message);
             }
 
         }
@@ -122,7 +122,7 @@ namespace MvcLib.FsDump
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError(ex.Message);
+                    Trace.TraceInformation(ex.Message);
                 }
             }
             else if (Directory.Exists(localpath))
