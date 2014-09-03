@@ -68,14 +68,19 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WebMarkupMin.Core">
+      <HintPath>$(SolutionDir)\packages\WebMarkupMin.Core.0.9.0-beta1\lib\net40\WebMarkupMin.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomErrorHttpModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SetCacheHttpModule.cs" />
     <Compile Include="TracerHttpModule.cs" />
+    <Compile Include="WhitespaceModule.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
