@@ -4,6 +4,10 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using MvcLib.Common;
+<<<<<<< HEAD
+=======
+using MvcLib.Common.Mvc;
+>>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
 
 namespace MvcLib.HttpModules
 {
@@ -137,13 +141,25 @@ NoteNote	The MapRequestHandler, LogRequest, and PostLogRequest events are suppor
 
             context.Items[Stopwatch] = System.Diagnostics.Stopwatch.StartNew();
 
+<<<<<<< HEAD
             bool isAjax = new HttpContextWrapper(context).Request.IsAjaxRequest();
+=======
+            bool isAjax = context.Request.IsAjaxRequest();
+>>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
 
             if (isAjax)
             {
                 context.Response.SuppressFormsAuthenticationRedirect = true;
             }
 
+<<<<<<< HEAD
+=======
+            if (context.Items.Contains("IIS_WasUrlRewritten"))
+            {
+                Trace.TraceWarning("Url was rewriten {0} to {1}", context.Request.RawUrl, context.Request.Url);
+            }
+
+>>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
             Trace.TraceInformation("[BeginRequest]:[{0}] {1} {2} {3}", rid, context.Request.HttpMethod, context.Request.RawUrl, isAjax ? "Ajax: True" : "");
         }
 
@@ -162,7 +178,11 @@ NoteNote	The MapRequestHandler, LogRequest, and PostLogRequest events are suppor
 
             if (context.Request.IsAuthenticated && context.Response.StatusCode == 403)
             {
+<<<<<<< HEAD
                 bool isAjax = new HttpContextWrapper(context).Request.IsAjaxRequest();
+=======
+                bool isAjax = context.Request.IsAjaxRequest();
+>>>>>>> f4d39c499476591d8185ca9a77b7d53b612692b3
                 if (!isAjax)
                 {
                     context.Response.Write("Você está autenticado mas não possui permissões para acessar este recurso");
