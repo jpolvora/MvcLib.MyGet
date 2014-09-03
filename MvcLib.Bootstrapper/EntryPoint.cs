@@ -99,6 +99,8 @@ namespace MvcLib.Bootstrapper
                     HostingEnvironment.RegisterVirtualPathProvider(customvpp);
                 }
 
+                //todo: implementar dependência entre módulos
+
                 if (Config.ValueOrDefault("Kompiler", false))
                 {
                     if (Config.ValueOrDefault("Kompiler:ForceRecompilation", false))
