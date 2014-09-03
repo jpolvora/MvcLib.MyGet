@@ -61,6 +61,10 @@ namespace MvcLib.Bootstrapper
                 {
                     DynamicModuleUtility.RegisterModule(typeof(CustomErrorHttpModule));
                 }
+                if (Config.ValueOrDefault("ForceCacheForAllFiles", true))
+                {
+                    DynamicModuleUtility.RegisterModule(typeof(SetCacheHttpModule));
+                }
 
                 using (DisposableTimer.StartNew("DbFileContext"))
                 {
