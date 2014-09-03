@@ -72,7 +72,7 @@ NoteNote	The MapRequestHandler, LogRequest, and PostLogRequest events are suppor
 
         public void Init(HttpApplication on)
         {
-            _eventsToTrace = Config.ValueOrDefault("TracerHttpModuleEvents", "").Split(',');
+            _eventsToTrace = Config.ValueOrDefault("Module:Trace:EventsToTrace", "").Split(',');
 
             _counter++;
             Trace.TraceInformation("Init: {0}", this);

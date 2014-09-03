@@ -18,8 +18,8 @@ namespace MvcLib.HttpModules
             context.BeginRequest += OnBeginRequest;
             context.Error += OnError;
 
-            _errorViewPath = Config.ValueOrDefault("CustomErrorViewPath", "~/views/shared/customerror.cshtml");
-            _errorController = Config.ValueOrDefault("CustomErrorController", "");
+            _errorViewPath = Config.ValueOrDefault("Module:CustomError:ViewPath", "~/views/shared/customerror.cshtml");
+            _errorController = Config.ValueOrDefault("Module:CustomError:Controller", "");
         }
 
         static void OnBeginRequest(object sender, EventArgs eventArgs)

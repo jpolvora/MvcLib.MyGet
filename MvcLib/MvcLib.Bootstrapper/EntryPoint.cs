@@ -51,17 +51,21 @@ namespace MvcLib.Bootstrapper
                 catch { }
             }
 
-            using (DisposableTimer.StartNew("PRE_START"))
+            using (DisposableTimer.StartNew("PRE_START: Configuring HttpModules"))
             {
-                if (Config.ValueOrDefault("TracerHttpModule", false))
+                if (Config.ValueOrDefault("Module:Trace", false))
                 {
                     DynamicModuleUtility.RegisterModule(typeof(TracerHttpModule));
                 }
-                if (Config.ValueOrDefault("CustomErrorHttpModule", false))
+                if (Config.ValueOrDefault("Module:CustomError", false))
                 {
                     DynamicModuleUtility.RegisterModule(typeof(CustomErrorHttpModule));
                 }
-                if (Config.ValueOrDefault("ForceCacheForAllFiles", true))
+                if (Config.ValueOrDefault("Module:WhiteSpace", true))
+                {
+                    DynamicModuleUtility.RegisterModule(typeof(WhitespaceModule));
+                }
+                if (Config.ValueOrDefault("Module:ForceCache", true))
                 {
                     DynamicModuleUtility.RegisterModule(typeof(SetCacheHttpModule));
                 }
