@@ -83,11 +83,14 @@ namespace MvcLib.Bootstrapper
                         PluginLoader.EntryPoint.Initialize();
                     }
                 }
+				
+				if (Config.ValueOrDefault("Bootstrapper:StopIISMonitoring", false))
+                {
+                    HttpInternals.StopFileMonitoring();
+				}
 
                 if (Config.ValueOrDefault("DumpToLocal", false))
                 {
-                    HttpInternals.StopFileMonitoring();
-
                     var customvpp = new SubfolderVpp();
                     HostingEnvironment.RegisterVirtualPathProvider(customvpp);
                     using (DisposableTimer.StartNew("DumpToLocal"))
