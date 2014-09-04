@@ -49,7 +49,7 @@ namespace MvcLib.Kompiler
                     }
                     else
                     {
-                        var localRootFolder = Config.ValueOrDefault("DumpToLocalFolder", "~/dbfiles");
+                        var localRootFolder = Config.ValueOrDefault("DumpToLocalFolder", "~/App_Data");
                         Trace.TraceInformation("Compiling from Local File System: {0}", localRootFolder);
                         msg = kompiler.CompileFromFolder(localRootFolder, out buffer);
                     }
