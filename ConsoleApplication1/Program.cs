@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Fclp;
 using MvcLib.Common;
 using MvcLib.DbFileSystem;
 
@@ -10,19 +11,48 @@ namespace ConsoleApplication1
 {
     class Program
     {
-        private static DirectoryInfo DirInfo;
+        private static DirectoryInfo _dirInfo;
 
+        //recomendado executar este programa no diretório raiz do projeto
         static void Main(string[] args)
         {
-            var setDirStr = Config.ValueOrDefault("dumpDir", "..\\..\\..\\HostWebApp\\dbfiles");
+            var setDir = Config.ValueOrDefault("dumpDir", "HostWebApp\\dbfiles");
 
-            Directory.SetCurrentDirectory(setDirStr);
-            DirInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
+            var p = new FluentCommandLineParser();
+            p.Setup<string>('d', "dir")
+                .SetDefault(setDir)
+                .WithDescription("Diretório raiz")
+                .Callback(x => setDir = x);
 
-            if (!DirInfo.Exists)
+            try
             {
-                throw new InvalidOperationException("Invalid directory " + DirInfo.FullName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), setDir);
+                Directory.SetCurrentDirectory(path);
+                _dirInfo = new DirectoryInfo(path);
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                if (_dirInfo != null)
+                {
+                    Loop();       
+                }
+            }
+
+            Console.WriteLine("");
+            Console.WriteLine("Fim. Pression qualquer tecla ...");
+            Console.Beep(440, 1000);
+            Console.ReadLine();
+        }
+
+        static void Loop()
+        {
+            Console.Clear();
+
+            Console.WriteLine("Root Folder is: {0}", _dirInfo.FullName);
 
             while (true)
             {
@@ -56,6 +86,7 @@ namespace ConsoleApplication1
                                 {
                                     Console.WriteLine(ex);
                                     Console.Beep(880, 500);
+                                    Console.ReadLine();
                                 }
                             }
                             break;
@@ -70,7 +101,7 @@ namespace ConsoleApplication1
                                     db.Database.ExecuteSqlCommand("DELETE FROM DbFiles");
                                     db.Database.ExecuteSqlCommand(@"EXEC sp_executesql ""DBCC CHECKIDENT('DbFiles', RESEED, 0)"" ");
 
-                                    WriteFilesToDatabase(db, new Uri(DirInfo.FullName), DirInfo, null);
+                                    WriteFilesToDatabase(db, new Uri(_dirInfo.FullName), _dirInfo, null);
 
                                     db.Database.ExecuteSqlCommand(@"EXEC sp_msforeachtable ""ALTER TABLE ? CHECK CONSTRAINT all""");
                                     ok = true;
@@ -79,6 +110,7 @@ namespace ConsoleApplication1
                                 {
                                     Console.WriteLine(ex);
                                     Console.Beep(880, 500);
+                                    Console.ReadLine();
                                 }
 
                                 break;
@@ -86,25 +118,18 @@ namespace ConsoleApplication1
                         }
                     default:
                         {
-                            Console.Clear();
                             break;
                         }
-
                 }
 
                 if (ok)
                     break;
             }
-
-            Console.WriteLine("");
-            Console.WriteLine("Fim. Pression qualquer tecla ...");
-            Console.Beep(440, 1000);
-            Console.ReadLine();
         }
 
         static string GetLocalPath(DbFile dbFile)
         {
-            string localpath = DirInfo.FullName + dbFile.VirtualPath.Replace("/", "\\");
+            string localpath = _dirInfo.FullName + dbFile.VirtualPath.Replace("/", "\\");
             return localpath;
         }
 

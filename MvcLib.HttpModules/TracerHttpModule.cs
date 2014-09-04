@@ -147,7 +147,7 @@ NoteNote	The MapRequestHandler, LogRequest, and PostLogRequest events are suppor
 
             if (context.Items.Contains("IIS_WasUrlRewritten"))
             {
-                Trace.TraceWarning("Url was rewriten {0} to {1}", context.Request.RawUrl, context.Request.Url);
+                Trace.TraceInformation("Url was rewriten from '{0}' to '{1}'", context.Request.ServerVariables["HTTP_X_ORIGINAL_URL"], context.Request.ServerVariables["SCRIPT_NAME"]);
             }
 
             Trace.TraceInformation("[BeginRequest]:[{0}] {1} {2} {3}", rid, context.Request.HttpMethod, context.Request.RawUrl, isAjax ? "Ajax: True" : "");

@@ -14,7 +14,7 @@ namespace MvcLib.DbFileSystem
             AutomaticMigrationsEnabled = true;
             AutomaticMigrationDataLossAllowed = true;
 
-            //ContextKey = "MvcLib.DbFileSystem";
+            ContextKey = Config.ValueOrDefault("DbFileContext:MigrationKey", "DbFileContextMigrationConfiguration");
 
             Trace.TraceInformation("Running Migrations... {0}", this);
         }

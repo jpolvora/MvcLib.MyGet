@@ -88,18 +88,23 @@ namespace MvcLib.Bootstrapper
                 {
                     HttpInternals.StopFileMonitoring();
 				}
-
-                if (Config.ValueOrDefault("DumpToLocal", false))
+				
+				if (Config.ValueOrDefault("SubfolderVpp", false))
                 {
                     var customvpp = new SubfolderVpp();
                     HostingEnvironment.RegisterVirtualPathProvider(customvpp);
+                }
+
+                if (Config.ValueOrDefault("DumpToLocal", false))
+                {
                     using (DisposableTimer.StartNew("DumpToLocal"))
                     {
                         DbToLocal.Execute();
                     }
-
                 }
-                else if (Config.ValueOrDefault("CustomVirtualPathProvider", false))
+				
+				//todo: Dependency Injection
+                if (Config.ValueOrDefault("CustomVirtualPathProvider", false))
                 {
                     var customvpp = new CustomVirtualPathProvider()
                         .AddImpl(new CachedDbServiceFileSystemProvider(new DefaultDbService(), new WebCacheWrapper()));
