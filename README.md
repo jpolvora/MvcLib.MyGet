@@ -3,7 +3,8 @@
 MvcLib.MyGet
 ============
 
-#Repository to build MvcLib Nuget Package
+#Repository to build [MvcLib](https://github.com/jpolvora/MvcLib) Nuget Package
+
 
 This repository contains a main project (Packager) that references MvcLib projects (subtree) in order to build a NuGet package.
 
