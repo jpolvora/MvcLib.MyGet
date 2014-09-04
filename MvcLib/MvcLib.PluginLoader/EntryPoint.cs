@@ -174,9 +174,16 @@ namespace MvcLib.PluginLoader
 
             var types = args.LoadedAssembly.GetExportedTypes();
 
-            foreach (var type in types)
+            if (types.Any())
             {
-                Trace.TraceInformation("Type exported: {0}", type.FullName);
+                foreach (var type in types)
+                {
+                    Trace.TraceInformation("Type exported: {0}", type.FullName);
+                }
+            }
+            else
+            {
+                Trace.TraceInformation("No types exported by Assembly: '{0}'", args.LoadedAssembly.GetName().Name);   
             }
 
             if (args.LoadedAssembly.IsDynamic)

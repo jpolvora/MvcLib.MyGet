@@ -1,6 +1,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,10 +13,18 @@ namespace MvcLib.Kompiler
 {
     public class CodeDomWrapper : IKompiler
     {
+        static CodeDomWrapper()
+        {
+            if (!AppDomain.CurrentDomain.IsFullyTrusted)
+            {
+                Trace.TraceWarning("CodeDom works only in full trust!");
+            }    
+        }
+
         public string CompileFromSource(Dictionary<string, string> files, out byte[] buffer)
         {
             if (files == null)
-                throw new ArgumentNullException("sourceFiles");
+                throw new ArgumentNullException("files");
 
             var output = Path.Combine(Path.GetTempPath(), EntryPoint.CompiledAssemblyName + ".dll");
 
@@ -77,7 +86,12 @@ namespace MvcLib.Kompiler
 
         public string CompileString(string text, out byte[] buffer)
         {
-            throw new NotImplementedException();
+            var dict = new Dictionary<string, string>()
+            {
+                {Guid.NewGuid().ToString("N"), text}
+            };
+
+            return CompileFromSource(dict, out buffer);
         }
     }
 }

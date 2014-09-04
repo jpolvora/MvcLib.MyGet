@@ -41,17 +41,17 @@ namespace MvcLib.Kompiler
                         kompiler = new CodeDomWrapper();
                     }
 
-                    if (Config.ValueOrDefault("DumpToLocal", false))
-                    {
-                        var localRootFolder = Config.ValueOrDefault("DumpToLocalFolder", "~/dbfiles");
-                        Trace.TraceInformation("Compiling from Local File System: {0}", localRootFolder);
-                        msg = kompiler.CompileFromFolder(localRootFolder, out buffer);
-                    }
-                    else
+                    if (Config.ValueOrDefault("Kompiler:LoadFromDb", false))
                     {
                         Trace.TraceInformation("Compiling from DB...");
                         var source = KompilerDbService.LoadSourceCodeFromDb();
                         msg = kompiler.CompileFromSource(source, out buffer);
+                    }
+                    else
+                    {
+                        var localRootFolder = Config.ValueOrDefault("DumpToLocalFolder", "~/dbfiles");
+                        Trace.TraceInformation("Compiling from Local File System: {0}", localRootFolder);
+                        msg = kompiler.CompileFromFolder(localRootFolder, out buffer);
                     }
                 }
                 catch (Exception ex)

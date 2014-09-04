@@ -120,6 +120,7 @@ namespace MvcLib.HttpModules
 
             var routeData = new RouteData();
             routeData.Values.Add("controller", controllerName);
+			routeData.Values.Add("action", "Error");
             routeData.Values.Add("Message", model.Message);
             routeData.Values.Add("StackTrace", model.StackTrace);
             routeData.Values.Add("Url", model.Url);

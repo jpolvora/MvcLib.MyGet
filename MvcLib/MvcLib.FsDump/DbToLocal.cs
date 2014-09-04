@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Web.Hosting;
 using MvcLib.Common;
 using MvcLib.DbFileSystem;
@@ -11,26 +10,30 @@ namespace MvcLib.FsDump
 {
     public class DbToLocal
     {
-        static void RecursiveDelete(DirectoryInfo fsInfo, bool self = false)
+        static void RecursiveDelete(DirectoryInfo fsInfo, bool self, params string[] extensionsToIgnore)
         {
-            foreach (var info in fsInfo.EnumerateFileSystemInfos())
+            var files = fsInfo.GetFiles("*.*", SearchOption.AllDirectories);
+            foreach (var fileInfo in files)
             {
-                if (info is DirectoryInfo)
-                    RecursiveDelete((DirectoryInfo)info, true);
+                if (extensionsToIgnore.Any(s => fileInfo.Extension.Equals(s, StringComparison.OrdinalIgnoreCase)))
+                    continue;
 
-                //info.Delete();
+                fileInfo.Delete();
             }
-            try
-            {
-                if (self)
-                    fsInfo.Delete(true);
-            }
-            catch
-            {
 
+            var folders = fsInfo.GetDirectories("*.*", SearchOption.AllDirectories);
+            foreach (var directoryInfo in folders)
+            {
+                if (directoryInfo.GetFiles("*.*", SearchOption.AllDirectories).Any())
+                    continue;
+
+                directoryInfo.Delete(true);
             }
+
+            if (self && !fsInfo.GetFiles("*.*", SearchOption.AllDirectories).Any())
+                fsInfo.Delete(true);
         }
-        
+
         private static readonly DirectoryInfo DirInfo;
 
         static DbToLocal()
@@ -42,7 +45,7 @@ namespace MvcLib.FsDump
             if (!DirInfo.Exists)
                 DirInfo.Create();
             else
-                RecursiveDelete(DirInfo);
+                RecursiveDelete(DirInfo, false, ".Config");
         }
 
         public static void Execute()
@@ -127,7 +130,7 @@ namespace MvcLib.FsDump
             }
             else if (Directory.Exists(localpath))
             {
-                RecursiveDelete(new DirectoryInfo(localpath), true);
+                RecursiveDelete(new DirectoryInfo(localpath), true, ".Config");
             }
         }
     }
