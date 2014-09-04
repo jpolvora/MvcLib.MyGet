@@ -71,12 +71,15 @@
     <Content Include="lib\net451\MvcLib.PluginLoader.pdb" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="content\App.config" />
     <None Include="lib\net451\MvcLib.Bootstrapper.dll.config" />
     <None Include="NuGetPackage.ps1" />
     <None Include="NuGetSetup.ps1" />
     <None Include="NuGet.exe" />
     <None Include="NuGet.config" />
-    <None Include="Package.nuspec" />
+    <None Include="Package.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="tools\init.ps1" />
     <None Include="tools\install.ps1" />
     <None Include="tools\uninstall.ps1" />
