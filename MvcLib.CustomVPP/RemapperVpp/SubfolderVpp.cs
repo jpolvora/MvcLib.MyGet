@@ -25,7 +25,7 @@ namespace MvcLib.CustomVPP.RemapperVpp
         }
 
         public SubfolderVpp()
-            : this(Config.ValueOrDefault("DumpToLocalFolder", "~/dbfiles"))
+            : this(Config.ValueOrDefault("DumpToLocalFolder", "~/App_Data"))
         {
         }
 
@@ -123,7 +123,7 @@ namespace MvcLib.CustomVPP.RemapperVpp
 
         string GetRemappedFullPath(string virtualPath)
         {
-            //se o path iniciar com ~/dbfiles / cfg
+            //se o path iniciar com ~/dbfiles / cfg (app_data)
             if (virtualPath.StartsWith(_absolutePath) || virtualPath.StartsWith(_relativePath))
                 return HostingEnvironment.MapPath(virtualPath);
 

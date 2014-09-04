@@ -38,7 +38,7 @@ namespace MvcLib.FsDump
 
         static DbToLocal()
         {
-            var path = Config.ValueOrDefault("DumpToLocalFolder", "~/dbfiles");
+            var path = Config.ValueOrDefault("DumpToLocalFolder", "~/App_Data");
 
             var root = Path.GetFullPath(HostingEnvironment.MapPath(path));
             DirInfo = new DirectoryInfo(root);

@@ -157,11 +157,6 @@ $RECYCLE.BIN/
 *.DotSettings
 *.rar
 traceOutput.txt
-_plugins
-
 *.dll
-/MvcFromDbMinimal/_files
-/HostWebApp/dbfiles
-/TestNuget/dbfiles
 *.nupkg
 *.bak
