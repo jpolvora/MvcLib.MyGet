@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web.Hosting;
-using MvcLib.Common;
+using MvcLib.Common.Configuration;
 using MvcLib.DbFileSystem;
 
 namespace MvcLib.FsDump
@@ -24,10 +24,17 @@ namespace MvcLib.FsDump
             var folders = fsInfo.GetDirectories("*.*", SearchOption.AllDirectories);
             foreach (var directoryInfo in folders)
             {
-                if (directoryInfo.GetFiles("*.*", SearchOption.AllDirectories).Any())
-                    continue;
+                try
+                {
+                    if (directoryInfo.Exists)
+                    {
+                        if (directoryInfo.GetFiles("*.*", SearchOption.AllDirectories).Any())
+                            continue;
 
-                directoryInfo.Delete(true);
+                        directoryInfo.Delete(true);
+                    }
+                }
+                catch { }
             }
 
             if (self && !fsInfo.GetFiles("*.*", SearchOption.AllDirectories).Any())
@@ -38,7 +45,7 @@ namespace MvcLib.FsDump
 
         static DbToLocal()
         {
-            var path = Config.ValueOrDefault("DumpToLocalFolder", "~/App_Data");
+            var path = BootstrapperSection.Instance.DumpToLocal.Folder;
 
             var root = Path.GetFullPath(HostingEnvironment.MapPath(path));
             DirInfo = new DirectoryInfo(root);
@@ -50,7 +57,7 @@ namespace MvcLib.FsDump
 
         public static void Execute()
         {
-            Trace.TraceInformation("[DbToLocal]: Starting...");
+            Trace.TraceInformation("[DbToLocal]: Starting... {0}", DirInfo.FullName);
 
             using (var ctx = new DbFileContext())
             {

@@ -1,6 +1,7 @@
 using System.Data.Entity.Migrations;
 using System.Diagnostics;
 using MvcLib.Common;
+using MvcLib.Common.Configuration;
 
 namespace MvcLib.DbFileSystem
 {
@@ -14,7 +15,7 @@ namespace MvcLib.DbFileSystem
             AutomaticMigrationsEnabled = true;
             AutomaticMigrationDataLossAllowed = true;
 
-            ContextKey = Config.ValueOrDefault("DbFileContext:MigrationKey", "DbFileContextMigrationConfiguration");
+            ContextKey = BootstrapperSection.Instance.DbFileContext.MigrationKey;
 
             Trace.TraceInformation("Running Migrations... {0}", this);
         }

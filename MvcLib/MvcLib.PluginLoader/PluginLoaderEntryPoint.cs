@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Web.Hosting;
 using System.Xml.Linq;
+using MvcLib.Common.Configuration;
 using MvcLib.DbFileSystem;
 
 namespace MvcLib.PluginLoader
@@ -14,13 +15,13 @@ namespace MvcLib.PluginLoader
      * http://shazwazza.com/post/Developing-a-plugin-framework-in-ASPNET-with-medium-trust
      */
 
-    public class EntryPoint
+    public class PluginLoaderEntryPoint
     {
         public static readonly DirectoryInfo PluginFolder;
 
         private static bool _initialized;
 
-        static EntryPoint()
+        static PluginLoaderEntryPoint()
         {
             //determinar probingPath
 
@@ -50,14 +51,6 @@ namespace MvcLib.PluginLoader
             {
                 PluginFolder.Create();
             }
-            else
-            {
-                foreach (var fileInfo in PluginFolder.EnumerateFiles("*.dll"))
-                {
-                    fileInfo.Delete();
-                }
-            }
-
         }
 
         public static void Initialize()
@@ -78,20 +71,39 @@ namespace MvcLib.PluginLoader
 
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
 
-            var assemblies = LoadFromDb();
+            var existingAssemblies = PluginFolder.GetFiles("*.dll", SearchOption.AllDirectories);
+            var filenames = existingAssemblies.Select(fileInfo => fileInfo.FullName).ToList();
 
-            var fileNames = WriteToDisk(assemblies);
+            if (BootstrapperSection.Instance.PluginLoader.DeleteFiles)
+            {
+                foreach (var filename in filenames)
+                {
+                    if (File.Exists(filename))
+                        File.Delete(filename);
+                }
 
-            LoadPlugins(fileNames);
+                filenames.Clear();
+            }
+
+
+            if (BootstrapperSection.Instance.PluginLoader.LoadFromDb)
+            {
+                var assemblies = LoadFromDb();
+
+                filenames.AddRange(WriteToDisk(assemblies));
+            }
+
+            LoadAndRegisterPlugins(filenames);
         }
 
 
         public static void LoadPlugin(string fileName, byte[] bytes)
         {
+            Trace.TraceInformation("Writing and Loading new compiled assembly: '{0}'", fileName);
             var kvp = new KeyValuePair<string, byte[]>(fileName, bytes);
 
             var fileNames = WriteToDisk(new[] { kvp });
-            LoadPlugins(fileNames);
+            LoadAndRegisterPlugins(fileNames);
         }
 
         static Dictionary<string, byte[]> LoadFromDb()
@@ -142,7 +154,7 @@ namespace MvcLib.PluginLoader
             return result;
         }
 
-        static void LoadPlugins(IEnumerable<string> fileNames)
+        static void LoadAndRegisterPlugins(IEnumerable<string> fileNames)
         {
             foreach (var fileName in fileNames)
             {
@@ -183,7 +195,7 @@ namespace MvcLib.PluginLoader
             }
             else
             {
-                Trace.TraceInformation("No types exported by Assembly: '{0}'", args.LoadedAssembly.GetName().Name);   
+                Trace.TraceInformation("No types exported by Assembly: '{0}'", args.LoadedAssembly.GetName().Name);
             }
 
             if (args.LoadedAssembly.IsDynamic)

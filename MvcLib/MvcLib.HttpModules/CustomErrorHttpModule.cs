@@ -4,6 +4,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using MvcLib.Common;
+using MvcLib.Common.Configuration;
 using MvcLib.Common.Mvc;
 
 namespace MvcLib.HttpModules
@@ -18,8 +19,8 @@ namespace MvcLib.HttpModules
             context.BeginRequest += OnBeginRequest;
             context.Error += OnError;
 
-            _errorViewPath = Config.ValueOrDefault("Module:CustomError:ViewPath", "~/views/shared/customerror.cshtml");
-            _errorController = Config.ValueOrDefault("Module:CustomError:Controller", "");
+            _errorViewPath = BootstrapperSection.Instance.HttpModules.CustomError.ErrorViewPath;
+            _errorController = BootstrapperSection.Instance.HttpModules.CustomError.ControllerName;
         }
 
         static void OnBeginRequest(object sender, EventArgs eventArgs)

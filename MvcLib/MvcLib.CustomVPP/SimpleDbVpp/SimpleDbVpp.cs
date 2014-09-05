@@ -23,7 +23,7 @@ namespace MvcLib.CustomVPP.SimpleDbVpp
 
         public SimpleDbVpp()
         {
-            var cfg = Config.ValueOrDefault("SimpleDbVppLocalCache", "~/db");
+            var cfg = "~/App_Data"; //Config.ValueOrDefault("SimpleDbVppLocalCache", "~/db");
 
             _relativePath = VirtualPathUtility.AppendTrailingSlash(VirtualPathUtility.ToAppRelative(cfg));
             _absolutePath = VirtualPathUtility.AppendTrailingSlash(VirtualPathUtility.ToAbsolute(cfg));
