@@ -17,10 +17,10 @@ namespace MvcLib.Kompiler
         static IProject CreateProject()
         {
             IProject project = Solution.Create(SolutionId.CreateNewId())
-                .AddCSharpProject(EntryPoint.CompiledAssemblyName, EntryPoint.CompiledAssemblyName + ".dll")
+                .AddCSharpProject(KompilerEntryPoint.CompiledAssemblyName, KompilerEntryPoint.CompiledAssemblyName + ".dll")
                 .Solution.Projects.Single()
                 .UpdateParseOptions(new ParseOptions().WithLanguageVersion(LanguageVersion.CSharp5))
-                .AddMetadataReferences(EntryPoint.RoslynReferences)
+                .AddMetadataReferences(KompilerEntryPoint.RoslynReferences)
                 .UpdateCompilationOptions(new CompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             return project;
@@ -71,7 +71,7 @@ namespace MvcLib.Kompiler
             var compiledCode = Compilation.Create(assemblyName,
                 new CompilationOptions(kind),
                 new[] { syntaxTree },
-                EntryPoint.RoslynReferences
+                KompilerEntryPoint.RoslynReferences
                 );
 
             //return buffer;
@@ -134,7 +134,7 @@ namespace MvcLib.Kompiler
         public string CompileString(string text, out byte[] buffer)
         {
             MemoryStream ms;
-            string result = TryCompile(text, EntryPoint.CompiledAssemblyName, out ms, OutputKind.DynamicallyLinkedLibrary);
+            string result = TryCompile(text, KompilerEntryPoint.CompiledAssemblyName, out ms, OutputKind.DynamicallyLinkedLibrary);
             buffer = ms.GetBuffer();
             return result;
         }

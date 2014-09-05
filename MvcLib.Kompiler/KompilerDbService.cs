@@ -37,7 +37,7 @@ namespace MvcLib.Kompiler
         {
             using (var ctx = new DbFileContext())
             {
-                return ctx.DbFiles.Any(x => x.VirtualPath.Equals("/" + EntryPoint.CompiledAssemblyName + ".dll", StringComparison.InvariantCultureIgnoreCase));
+                return ctx.DbFiles.Any(x => x.VirtualPath.Equals("/" + KompilerEntryPoint.CompiledAssemblyName + ".dll", StringComparison.InvariantCultureIgnoreCase));
             }
         }
 
@@ -45,7 +45,7 @@ namespace MvcLib.Kompiler
         {
             using (var ctx = new DbFileContext())
             {
-                var existingFile = ctx.DbFiles.FirstOrDefault(x => x.VirtualPath.Equals("/" + EntryPoint.CompiledAssemblyName + ".dll", StringComparison.InvariantCultureIgnoreCase));
+                var existingFile = ctx.DbFiles.FirstOrDefault(x => x.VirtualPath.Equals("/" + KompilerEntryPoint.CompiledAssemblyName + ".dll", StringComparison.InvariantCultureIgnoreCase));
                 if (existingFile != null)
                 {
                     ctx.DbFiles.Remove(existingFile);

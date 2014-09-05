@@ -14,9 +14,6 @@ namespace MvcLib.PluginLoader
 
         internal static void Register(string fileName)
         {
-            if (Assemblies.ContainsKey(fileName))
-                Assemblies.Remove(fileName);
-
             try
             {
                 var loadingAssembly = Assembly.LoadFile(fileName);

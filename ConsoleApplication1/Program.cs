@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Fclp;
 using MvcLib.Common;
+using MvcLib.Common.Configuration;
 using MvcLib.DbFileSystem;
 
 namespace ConsoleApplication1
@@ -16,7 +17,7 @@ namespace ConsoleApplication1
         //recomendado executar este programa no diretório raiz do projeto
         static void Main(string[] args)
         {
-            var setDir = Config.ValueOrDefault("dumpDir", "HostWebApp\\dbfiles");
+            var setDir = BootstrapperSection.Instance.DumpToLocal.Folder;
 
             var p = new FluentCommandLineParser();
             p.Setup<string>('d', "dir")
