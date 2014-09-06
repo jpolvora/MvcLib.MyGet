@@ -1,3 +1,3 @@
 ﻿MVCLIB
 
-Include a .Config file
+Includes a .Config file
