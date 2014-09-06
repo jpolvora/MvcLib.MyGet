@@ -98,6 +98,8 @@
     <Compile Include="ExtJs\ExtJsUpdater.cs" />
     <Compile Include="ExtJs\Lambda.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="HttpHandlerExtensions.cs" />
+    <Compile Include="HttpHandlerRouteHandler.cs" />
     <Compile Include="HttpHandlers\MinifyHandler.cs" />
     <Compile Include="MvcTracerFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -106,6 +108,7 @@
     <Compile Include="TempData.cs" />
     <Compile Include="ViewRenderer.cs" />
     <Compile Include="WebPageExtensions.cs" />
+    <Compile Include="WebPagesRouteHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

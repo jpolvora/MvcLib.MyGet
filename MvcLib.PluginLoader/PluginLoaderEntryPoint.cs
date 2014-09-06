@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Web.Hosting;
 using System.Xml.Linq;
 using MvcLib.Common.Configuration;
@@ -21,6 +20,9 @@ namespace MvcLib.PluginLoader
 
         private static bool _initialized;
 
+        private static readonly PluginStorage Storage;
+
+
         static PluginLoaderEntryPoint()
         {
             //determinar probingPath
@@ -37,7 +39,9 @@ namespace MvcLib.PluginLoader
 
                 if (probingElement != null)
                 {
-                    privatePath = probingElement.Attribute("privatePath").Value;
+                    var paths = probingElement.Attribute("privatePath").Value; //pode conter vários paths, separados por ';'
+                    Trace.TraceInformation("Private Path is '{0}'", paths);
+                    privatePath = paths.Split(';')[0];
                 }
             }
             catch (Exception ex)
@@ -45,12 +49,15 @@ namespace MvcLib.PluginLoader
                 Trace.TraceInformation("Error reading probing privatePath in web.config. {0}", ex.Message);
             }
 
+
             PluginFolder = new DirectoryInfo(HostingEnvironment.MapPath(privatePath));
 
             if (!PluginFolder.Exists)
             {
                 PluginFolder.Create();
             }
+
+            Storage = new PluginStorage(PluginFolder);
         }
 
         public static void Initialize()
@@ -59,17 +66,6 @@ namespace MvcLib.PluginLoader
                 return;
 
             _initialized = true;
-
-            if (AppDomain.CurrentDomain.IsFullyTrusted)
-            {
-                AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-            }
-            else
-            {
-                Trace.TraceWarning("We are not in FULL TRUST! We must use private probing path in Web.Config");
-            }
-
-            AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
 
             var existingAssemblies = PluginFolder.GetFiles("*.dll", SearchOption.AllDirectories);
             var filenames = existingAssemblies.Select(fileInfo => fileInfo.FullName).ToList();
@@ -85,28 +81,37 @@ namespace MvcLib.PluginLoader
                 filenames.Clear();
             }
 
-
             if (BootstrapperSection.Instance.PluginLoader.LoadFromDb)
             {
                 var assemblies = LoadFromDb();
-
-                filenames.AddRange(WriteToDisk(assemblies));
+                var dbAssemblies = WriteToDisk(assemblies);
+                filenames.AddRange(dbAssemblies);
             }
 
-            LoadAndRegisterPlugins(filenames);
+            LoadAndRegisterPlugins(filenames.ToArray());
         }
 
+        static void LoadAndRegisterPlugins(params string[] fileNames)
+        {
+            foreach (var fileName in fileNames)
+            {
+                if (File.Exists(fileName))
+                {
+                    Storage.LoadAndRegister(fileName);
+                }
+            }
+        }
 
-        public static void LoadPlugin(string fileName, byte[] bytes)
+        public static void SaveAndLoadAssembly(string fileName, byte[] bytes)
         {
             Trace.TraceInformation("Writing and Loading new compiled assembly: '{0}'", fileName);
             var kvp = new KeyValuePair<string, byte[]>(fileName, bytes);
 
             var fileNames = WriteToDisk(new[] { kvp });
-            LoadAndRegisterPlugins(fileNames);
+            LoadAndRegisterPlugins(fileNames.ToArray());
         }
 
-        static Dictionary<string, byte[]> LoadFromDb()
+        private static Dictionary<string, byte[]> LoadFromDb()
         {
             var assemblies = new Dictionary<string, byte[]>();
             using (var ctx = new DbFileContext())
@@ -125,7 +130,7 @@ namespace MvcLib.PluginLoader
             return assemblies;
         }
 
-        static IEnumerable<string> WriteToDisk(IEnumerable<KeyValuePair<string, byte[]>> assemblies)
+        private static IEnumerable<string> WriteToDisk(IEnumerable<KeyValuePair<string, byte[]>> assemblies)
         {
             var result = new List<string>();
             try
@@ -144,6 +149,9 @@ namespace MvcLib.PluginLoader
                     File.WriteAllBytes(fullFileName, assembly.Value);
 
                     result.Add(fullFileName);
+
+                    Trace.TraceInformation("[PluginLoader]: Assembly written to disk: {0}", fullFileName);
+
                 }
             }
             catch (Exception ex)
@@ -153,107 +161,5 @@ namespace MvcLib.PluginLoader
 
             return result;
         }
-
-        static void LoadAndRegisterPlugins(IEnumerable<string> fileNames)
-        {
-            foreach (var fileName in fileNames)
-            {
-                if (File.Exists(fileName))
-                {
-                    PluginStorage.Register(fileName);
-                }
-            }
-        }
-
-        private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            if (args.RequestingAssembly != null)
-                return args.RequestingAssembly;
-
-            var ass = PluginStorage.FindAssembly(args.Name);
-            if (ass != null)
-                Trace.TraceInformation("Assembly found and resolved: {0} = {1}", ass.FullName, ass.Location);
-
-            return ass; //not found
-        }
-
-        private static void OnAssemblyLoad(object sender, AssemblyLoadEventArgs args)
-        {
-            if (args.LoadedAssembly.GlobalAssemblyCache)
-                return;
-
-            Trace.TraceInformation("Assembly Loaded... {0}", args.LoadedAssembly.Location);
-
-            var types = args.LoadedAssembly.GetExportedTypes();
-
-            if (types.Any())
-            {
-                foreach (var type in types)
-                {
-                    Trace.TraceInformation("Type exported: {0}", type.FullName);
-                }
-            }
-            else
-            {
-                Trace.TraceInformation("No types exported by Assembly: '{0}'", args.LoadedAssembly.GetName().Name);
-            }
-
-            if (args.LoadedAssembly.IsDynamic)
-            {
-                Trace.TraceInformation("DYNAMIC Assembly Loaded... {0}", args.LoadedAssembly.Location);
-                return;
-            }
-
-            var path = Path.GetDirectoryName(args.LoadedAssembly.Location);
-
-            if (string.IsNullOrWhiteSpace(path) ||
-                !path.StartsWith(PluginFolder.FullName, StringComparison.InvariantCultureIgnoreCase)) return;
-
-            try
-            {
-                PluginStorage.Register(args.LoadedAssembly);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceInformation(ex.Message);
-            }
-        }
-
-        //public static void RecursiveDeleteDirectory(DirectoryInfo baseDir, bool self, params string[] extensions)
-        //{
-        //    if (!baseDir.Exists)
-        //        return;
-
-        //    foreach (var directoryInfo in baseDir.EnumerateDirectories())
-        //    {
-        //        RecursiveDeleteDirectory(directoryInfo, true, extensions);
-        //    }
-
-        //    if (self && baseDir.Exists)
-        //        baseDir.Delete(true);
-        //}
-
-        //public static bool IsFileLocked(string path)
-        //{
-        //    if (!File.Exists(path))
-        //        return false;
-
-        //    FileStream file = null;
-        //    try
-        //    {
-        //        file = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return true;
-        //    }
-        //    finally
-        //    {
-        //        if (file != null)
-        //            file.Close();
-        //    }
-
-        //    return false;
-        //}
     }
 }

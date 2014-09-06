@@ -51,8 +51,12 @@ namespace MvcLib.FsDump
             DirInfo = new DirectoryInfo(root);
             if (!DirInfo.Exists)
                 DirInfo.Create();
-            else
+
+            if (BootstrapperSection.Instance.DumpToLocal.DeleteFiles)
+            {
+                Trace.TraceInformation("[DumpToLocal]: Deleting files before dumping.");
                 RecursiveDelete(DirInfo, false, ".Config");
+            }
         }
 
         public static void Execute()

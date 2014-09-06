@@ -25,8 +25,6 @@ namespace MvcLib.HttpModules
 
         static void OnBeginRequest(object sender, EventArgs eventArgs)
         {
-            var application = (HttpApplication)sender;
-            application.Response.TrySkipIisCustomErrors = true;
         }
 
         void OnError(object sender, EventArgs args)
@@ -46,12 +44,8 @@ namespace MvcLib.HttpModules
 
             Trace.TraceInformation("[CustomError]: Ocorreu uma exceção: {0}", exception.Message);
 
-            var statusCode = response.StatusCode;
-            var httpException = exception as HttpException;
-            if (httpException != null)
-            {
-                statusCode = httpException.GetHttpCode();
-            }
+            var httpException = exception as HttpException ?? new HttpException(null, exception);
+            var statusCode = httpException.GetHttpCode();
 
             server.ClearError();
             response.Clear();
@@ -61,7 +55,8 @@ namespace MvcLib.HttpModules
             //Prevents customError behavior when the request is determined to be an AJAX request.
             if (request.IsAjaxRequest())
             {
-                response.Write(string.Format("<html><body><h1>{0} {1}</h1></body></html>", statusCode, exception.Message));
+                //response.Write(string.Format("<html><body><h1>{0} {1}</h1></body></html>", statusCode, exception.Message));
+                new HttpContextWrapper(HttpContext.Current).Response.WriteAjaxException(exception);
             }
             else
             {
@@ -92,8 +87,9 @@ namespace MvcLib.HttpModules
                 LogEvent.Raise(exception.Message, exception);
             }
 
+            application.Response.TrySkipIisCustomErrors = true;
             //application.CompleteRequest(); //não imprime o resultado
-            response.End();
+            //response.End();
         }
 
         private static void RenderView(string errorViewPath, ErrorModel model, HttpResponse response)

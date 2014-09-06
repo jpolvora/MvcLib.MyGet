@@ -37,7 +37,7 @@ namespace MvcLib.Kompiler
                 IncludeDebugInformation = false,
             };
 
-            foreach (var codeDomReference in KompilerEntryPoint.CodeDomReferences)
+            foreach (var codeDomReference in KompilerEntryPoint.ReferencePaths)
             {
                 compilerParameters.ReferencedAssemblies.Add(codeDomReference);
             }

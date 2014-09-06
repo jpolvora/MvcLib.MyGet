@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Web;
 using System.Web.Hosting;
@@ -37,11 +39,16 @@ namespace MvcLib.Bootstrapper
                 var executingAssembly = Assembly.GetExecutingAssembly();
                 Trace.TraceInformation("Entry Assembly: {0}", executingAssembly.GetName().Name);
 
-                if (Debugger.IsAttached)
+                var cfg = BootstrapperSection.Initialize();
+
+                if (Debugger.IsAttached || cfg.TraceOutput.IsNotNullOrWhiteSpace())
                 {
                     try
                     {
-                        var traceOutput = HostingEnvironment.MapPath("~/traceOutput.log");
+                        var path = cfg.TraceOutput;
+                        if (!path.StartsWith("~"))
+                            path = "~" + path;
+                        var traceOutput = HostingEnvironment.MapPath(path);
                         if (File.Exists(traceOutput))
                             File.Delete(traceOutput);
 
@@ -52,9 +59,6 @@ namespace MvcLib.Bootstrapper
                     }
                     catch { }
                 }
-
-                var cfg = BootstrapperSection.Initialize();
-
 
                 if (cfg.HttpModules.Trace.Enabled)
                 {
@@ -110,41 +114,46 @@ namespace MvcLib.Bootstrapper
                     HostingEnvironment.RegisterVirtualPathProvider(customvpp);
                 }
 
-                //todo: implementar dependência entre módulos
+                KompilerEntryPoint.AddReferences(
+                    typeof(Controller),
+                    typeof(WebPageRenderingBase),
+                    typeof(WebCacheWrapper),
+                    typeof(ViewRenderer),
+                    typeof(DbToLocal),
+                    typeof(CustomErrorHttpModule.ErrorModel));
 
                 if (cfg.Kompiler.Enabled)
                 {
-                    KompilerEntryPoint.AddReferences(typeof(Controller), typeof(WebPageRenderingBase), typeof(WebCacheWrapper), typeof(ViewRenderer), typeof(DbToLocal), typeof(CustomErrorHttpModule.ErrorModel));
-
                     using (DisposableTimer.StartNew("Kompiler"))
                     {
                         KompilerEntryPoint.Execute();
                     }
                 }
 
-                //config routing
-                //var routes = RouteTable.Routes;
+                if (cfg.InsertRoutes)
+                {
+                    var routes = RouteTable.Routes;
 
-                //if (EntropiaSection.Instance.InsertRoutesDefaults)
-                //{
-                //    routes.RouteExistingFiles = false;
-                //    routes.LowercaseUrls = true;
-                //    routes.AppendTrailingSlash = true;
+                    routes.RouteExistingFiles = false;
+                    routes.LowercaseUrls = true;
+                    routes.AppendTrailingSlash = true;
 
-                //    routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-                //    routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
-                //    routes.IgnoreRoute("{*staticfile}", new { staticfile = @".*\.(css|js|txt|png|gif|jpg|jpeg|bmp)(/.*)?" });
+                    routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+                    routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
+                    routes.IgnoreRoute("{*staticfile}", new { staticfile = @".*\.(css|js|txt|png|gif|jpg|jpeg|bmp)(/.*)?" });
 
-                //    routes.IgnoreRoute("Content/{*pathInfo}");
-                //    routes.IgnoreRoute("Scripts/{*pathInfo}");
-                //    routes.IgnoreRoute("Bundles/{*pathInfo}");
-                //}
+                    routes.IgnoreRoute("Content/{*pathInfo}");
+                    routes.IgnoreRoute("Scripts/{*pathInfo}");
+                    routes.IgnoreRoute("Bundles/{*pathInfo}");
 
-                //if (EntropiaSection.Instance.EnableDumpLog)
-                //{
-                //    var endpoint = EntropiaSection.Instance.DumpLogEndPoint;
-                //    routes.MapHttpHandler<DumpHandler>(endpoint);
-                //}
+                    //routes.MapRoute("MvcLib", "{controller}/{action}", new string[] { "" });
+
+
+                    if (cfg.TraceOutput.IsNotNullOrWhiteSpace())
+                    {
+                        //routes.MapHttpHandler<WebPagesRouteHandler>("~/dump.cshtml");
+                    }
+                }
             }
         }
 
@@ -157,34 +166,107 @@ namespace MvcLib.Bootstrapper
 
             using (DisposableTimer.StartNew("RUNNING POST_START ..."))
             {
-                if (BootstrapperSection.Instance.MvcTrace.Enabled)
+                var cfg = BootstrapperSection.Instance;
+
+                if (cfg.MvcTrace.Enabled)
                 {
                     GlobalFilters.Filters.Add(new MvcTracerFilter());
                 }
 
-                var application = HttpContext.Current.ApplicationInstance;
-
-                var modules = application.Modules;
-                foreach (var module in modules)
+                if (cfg.Verbose)
                 {
-                    Trace.TraceInformation("Module Loaded: {0}", module);
+                    var application = HttpContext.Current.ApplicationInstance;
+
+                    var modules = application.Modules;
+                    foreach (var module in modules)
+                    {
+                        Trace.TraceInformation("Module Loaded: {0}", module);
+                    }
                 }
 
                 //dump routes
                 var routes = RouteTable.Routes;
 
-                var i = routes.Count;
-                Trace.TraceInformation("Found {0} routes in RouteTable", i);
-
-                foreach (var routeBase in routes)
+                if (cfg.Verbose)
                 {
-                    var route = (Route)routeBase;
-                    Trace.TraceInformation("Handler: {0} at URL: {1}", route.RouteHandler, route.Url);
+                    var i = routes.Count;
+                    Trace.TraceInformation("Found {0} routes in RouteTable", i);
+
+                    foreach (var routeBase in routes)
+                    {
+                        var route = (Route) routeBase;
+                        Trace.TraceInformation("Handler: {0} at URL: {1}", route.RouteHandler, route.Url);
+                    }
                 }
 
                 if (!Debugger.IsAttached)
                 {
                     Trace.Listeners.Remove("StartupListener");
+                }
+
+                //viewengine locations
+                var mvcroot = cfg.DumpToLocal.Folder;
+
+                var razorViewEngine = ViewEngines.Engines.OfType<RazorViewEngine>().FirstOrDefault();
+                if (razorViewEngine != null)
+                {
+                    Trace.TraceInformation("Configuring RazorViewEngine Location Formats");
+                    var vlf = new string[]
+                    {
+                        mvcroot + "/Views/{1}/{0}.cshtml",
+                        mvcroot + "/Views/Shared/{0}.cshtml",
+                    };
+                    razorViewEngine.ViewLocationFormats = razorViewEngine.ViewLocationFormats.Extend(false, vlf);
+
+                    var mlf = new string[]
+                    {
+                        mvcroot + "/Views/{1}/{0}.cshtml",
+                        mvcroot + "/Views/Shared/{0}.cshtml",
+                    };
+                    razorViewEngine.MasterLocationFormats = razorViewEngine.MasterLocationFormats.Extend(false, mlf);
+
+                    var plf = new string[]
+                    {
+                        mvcroot + "/Views/{1}/{0}.cshtml",
+                        mvcroot + "/Views/Shared/{0}.cshtml",
+                    };
+                    razorViewEngine.PartialViewLocationFormats = razorViewEngine.PartialViewLocationFormats.Extend(false, plf);
+
+                    var avlf = new string[]
+                    {
+                        mvcroot + "/Areas/{2}/Views/{1}/{0}.cshtml",
+                        mvcroot + "/Areas/{2}/Views/Shared/{0}.cshtml",
+                    };
+                    razorViewEngine.AreaViewLocationFormats = razorViewEngine.AreaViewLocationFormats.Extend(false, avlf);
+
+                    var amlf = new string[]
+                    {
+                        mvcroot + "/Areas/{2}/Views/{1}/{0}.cshtml",
+                        mvcroot + "/Areas/{2}/Views/Shared/{0}.cshtml",
+                    };
+                    razorViewEngine.AreaMasterLocationFormats = razorViewEngine.AreaMasterLocationFormats.Extend(false, amlf);
+
+                    var apvlf = new string[]
+                    {
+                        mvcroot + "/Areas/{2}/Views/{1}/{0}.cshtml",
+                        mvcroot + "/Areas/{2}/Views/Shared/{0}.cshtml",
+                    };
+                    razorViewEngine.AreaPartialViewLocationFormats = razorViewEngine.AreaPartialViewLocationFormats.Extend(false, apvlf);
+
+                    if (cfg.Verbose)
+                    {
+                        foreach (var locationFormat in razorViewEngine.ViewLocationFormats)
+                        {
+                            Trace.WriteLine(locationFormat);
+                        }
+                    }
+
+                    ViewEngines.Engines.Clear();
+                    ViewEngines.Engines.Add(razorViewEngine);
+                }
+                else
+                {
+                    Trace.TraceInformation("Cannot Configure RazorViewEngine: View Engine not found");
                 }
             }
         }

@@ -10,6 +10,7 @@ using System.Web.Compilation;
 using System.Web.Hosting;
 using System.Web.Razor;
 using System.Web.Razor.Parser.SyntaxTree;
+using System.Web.WebPages;
 using System.Web.WebPages.Razor;
 using Microsoft.CSharp;
 using Roslyn.Compilers;
@@ -23,6 +24,12 @@ namespace MvcLib.Kompiler
         {
             try
             {
+                var extension = VirtualPathUtility.GetExtension(virtualPath);
+                if (extension.IsEmpty() || extension != ".cshtml")
+                {
+                    return string.Empty;
+                }
+
                 Trace.TraceInformation("Parsing razor... {0}", virtualPath);
                 var host = WebRazorHostFactory.CreateHostFromConfig(virtualPath);
                 string code = GenerateCodeFromRazorString(host, sourceRazor, virtualPath);

@@ -54,7 +54,11 @@ namespace MvcLib.DbFileSystem
         static void Log(string str)
         {
             if (str.StartsWith("-- Completed"))
+            {
+                Trace.Indent();
                 Trace.TraceInformation("[DbFileContext]:{0}", str.Replace(Environment.NewLine, ""));
+                Trace.Unindent();
+            }
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

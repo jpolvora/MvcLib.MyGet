@@ -11,6 +11,11 @@ namespace MvcLib.Common.Mvc
 
         }
 
+        public bool IsRazorWebPage
+        {
+            get { return false; }
+        }
+
         public override void ExecutePageHierarchy()
         {
             if (IsAjax || string.IsNullOrWhiteSpace(Layout))
@@ -43,6 +48,11 @@ namespace MvcLib.Common.Mvc
         {
             //actually this is never called
             throw new NotImplementedException();
+        }
+
+        public bool IsRazorWebPage
+        {
+            get { return false; }
         }
 
         public override void ExecutePageHierarchy()

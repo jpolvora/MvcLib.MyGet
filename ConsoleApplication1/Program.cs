@@ -17,6 +17,17 @@ namespace ConsoleApplication1
         //recomendado executar este programa no diretório raiz do projeto
         static void Main(string[] args)
         {
+            foreach (var s in args)
+            {
+                Console.Write(s + ";");
+            }
+            
+            args = args.Extend(true, "teste");
+            foreach (var s in args)
+            {
+                Console.Write(s + ";");
+            }
+
             var setDir = BootstrapperSection.Instance.DumpToLocal.Folder;
 
             var p = new FluentCommandLineParser();
@@ -24,6 +35,8 @@ namespace ConsoleApplication1
                 .SetDefault(setDir)
                 .WithDescription("Diretório raiz")
                 .Callback(x => setDir = x);
+
+            p.Parse(args);
 
             try
             {
@@ -39,7 +52,7 @@ namespace ConsoleApplication1
             {
                 if (_dirInfo != null)
                 {
-                    Loop();       
+                    Loop();
                 }
             }
 

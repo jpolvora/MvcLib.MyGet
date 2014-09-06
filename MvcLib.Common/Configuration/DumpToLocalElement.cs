@@ -10,5 +10,12 @@ namespace MvcLib.Common.Configuration
             get { return (string)this["folder"]; }
             set { this["folder"] = value; }
         }
+
+        [ConfigurationProperty("deletefiles", DefaultValue = false)]
+        public bool DeleteFiles
+        {
+            get { return (bool)this["deletefiles"]; }
+            set { this["deletefiles"] = value; }
+        }
     }
 }
