@@ -14,13 +14,21 @@ namespace MvcLib.Kompiler
 {
     public class RoslynWrapper : IKompiler
     {
+        static IEnumerable<MetadataReference> GetMetadataReferences()
+        {
+            foreach (var reference in KompilerEntryPoint.ReferencePaths)
+            {
+                yield return new MetadataFileReference(reference);
+            }
+        }
+
         static IProject CreateProject()
         {
             IProject project = Solution.Create(SolutionId.CreateNewId())
                 .AddCSharpProject(KompilerEntryPoint.CompiledAssemblyName, KompilerEntryPoint.CompiledAssemblyName + ".dll")
                 .Solution.Projects.Single()
                 .UpdateParseOptions(new ParseOptions().WithLanguageVersion(LanguageVersion.CSharp5))
-                .AddMetadataReferences(KompilerEntryPoint.RoslynReferences)
+                .AddMetadataReferences(GetMetadataReferences())
                 .UpdateCompilationOptions(new CompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             return project;
@@ -71,7 +79,7 @@ namespace MvcLib.Kompiler
             var compiledCode = Compilation.Create(assemblyName,
                 new CompilationOptions(kind),
                 new[] { syntaxTree },
-                KompilerEntryPoint.RoslynReferences
+                GetMetadataReferences()
                 );
 
             //return buffer;

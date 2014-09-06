@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.WebPages;
+using MvcLib.Common;
 using MvcLib.Common.Configuration;
 using MvcLib.Common.Mvc;
 
@@ -32,6 +34,9 @@ namespace MvcLib.HttpModules
         static bool MustLog(string eventName)
         {
             if (_eventsToTrace.Length == 0)
+                return true;
+
+            if (_eventsToTrace.Any(x => x.IsEmpty()))
                 return true;
 
             return _eventsToTrace.Any(x => x.Equals(eventName, StringComparison.OrdinalIgnoreCase));

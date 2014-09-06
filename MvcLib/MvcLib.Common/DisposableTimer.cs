@@ -7,11 +7,10 @@ namespace MvcLib.Common
     public class DisposableTimer : IDisposable
     {
         private readonly string _msg;
-
         private readonly Stopwatch _stopwatch;
         private readonly Action<double> _callback;
 
-        public static DisposableTimer StartNew(Type type, string msg = "", Action<double> callBack = null)
+        public static DisposableTimer StartNew(string msg, Type type, Action<double> callBack = null)
         {
             return new DisposableTimer(type.Name, msg, callBack);
         }
@@ -41,10 +40,7 @@ namespace MvcLib.Common
             {
                 _callback.Invoke(ms);
             }
-            else
-            {
-                Trace.TraceInformation("[End Timer]:{0}, Completed: {1}ms", _msg, ms.ToString("##.000"));
-            }
+            Trace.TraceInformation("[End Timer]:{0}, Completed: {1}ms", _msg, ms.ToString("##.000"));
         }
     }
 }

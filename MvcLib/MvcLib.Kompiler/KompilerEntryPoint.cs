@@ -4,7 +4,7 @@ using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using MvcLib.Common;
+using System.Web.Compilation;
 using MvcLib.Common.Configuration;
 using MvcLib.PluginLoader;
 using Roslyn.Compilers;
@@ -33,6 +33,8 @@ namespace MvcLib.Kompiler
                 KompilerDbService.RemoveExistingCompiledAssemblyFromDb();
             }
 
+            AddReferences(PluginStorage.GetAssemblies().ToArray());
+
             byte[] buffer = new byte[0];
             string msg;
 
@@ -49,8 +51,6 @@ namespace MvcLib.Kompiler
                 {
                     kompiler = new CodeDomWrapper();
                 }
-
-                AddReferences(PluginStorage.GetAssemblies().ToArray());
 
                 if (BootstrapperSection.Instance.Kompiler.LoadFromDb)
                 {
@@ -78,10 +78,10 @@ namespace MvcLib.Kompiler
                 if (!BootstrapperSection.Instance.Kompiler.ForceRecompilation)
                 {
                     //só salva no banco se compilação forçada for False
-                    KompilerDbService.SaveCompiledCustomAssembly(CompiledAssemblyName, buffer);
+                    KompilerDbService.SaveCompiledCustomAssembly(buffer);
                 }
 
-                PluginLoaderEntryPoint.LoadPlugin(CompiledAssemblyName + ".dll", buffer);
+                PluginLoaderEntryPoint.SaveAndLoadAssembly(CompiledAssemblyName + ".dll", buffer);
             }
             else
             {
@@ -98,8 +98,8 @@ namespace MvcLib.Kompiler
 
             foreach (var type in types)
             {
-                CodeDomReferences.Add(type.Assembly.Location);
-                RoslynReferences.Add(new MetadataFileReference(type.Assembly.Location));
+                if (!ReferencePaths.Contains(type.Assembly.Location))
+                    ReferencePaths.Add(type.Assembly.Location);
             }
         }
 
@@ -108,13 +108,13 @@ namespace MvcLib.Kompiler
 
             foreach (var assembly in assemblies)
             {
-                CodeDomReferences.Add(assembly.Location);
-                RoslynReferences.Add(new MetadataFileReference(assembly.Location));
+                if (!ReferencePaths.Contains(assembly.Location))
+                    ReferencePaths.Add(assembly.Location);
             }
         }
 
         //todo: passar para a classe correta
-        internal static List<string> CodeDomReferences = new List<string>()
+        internal static List<string> ReferencePaths = new List<string>()
         {
                     typeof (object).Assembly.Location, //System
                     typeof (Enumerable).Assembly.Location, //System.Core.dll
@@ -125,24 +125,5 @@ namespace MvcLib.Kompiler
                     typeof(DbContext).Assembly.Location,
                     typeof(CodeDomWrapper).Assembly.Location
         };
-
-        //todo: passar para a classe correta
-        internal static List<MetadataReference> RoslynReferences = new List<MetadataReference>
-        {
-            MetadataReference. CreateAssemblyReference("mscorlib"),
-            MetadataReference.CreateAssemblyReference("System"),
-            MetadataReference.CreateAssemblyReference("System.Core"),
-            MetadataReference.CreateAssemblyReference("System.Data"),
-            MetadataReference.CreateAssemblyReference("Microsoft.CSharp"),
-            MetadataReference.CreateAssemblyReference("System.Web"),
-            MetadataReference.CreateAssemblyReference("System.ComponentModel.DataAnnotations"),
-            new MetadataFileReference(typeof (Roslyn.Services.Solution).Assembly.Location), //self
-            new MetadataFileReference(typeof (Roslyn.Compilers.CSharp.Compilation).Assembly.Location), //self
-            new MetadataFileReference(typeof (Roslyn.Compilers.Common.CommonCompilation).Assembly.Location), //self
-            new MetadataFileReference(typeof (Roslyn.Scripting.Session).Assembly.Location), //self
-            new MetadataFileReference(typeof (RoslynWrapper).Assembly.Location), //self            
-            new MetadataFileReference(typeof (DbContext).Assembly.Location), //ef    
-        };
-
     }
 }

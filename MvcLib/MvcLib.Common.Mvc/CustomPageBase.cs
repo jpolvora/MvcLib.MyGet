@@ -14,6 +14,11 @@ namespace MvcLib.Common.Mvc
             throw new NotImplementedException();
         }
 
+        public bool IsRazorWebPage
+        {
+            get { return true; }
+        }
+
 
         public override void ExecutePageHierarchy()
         {

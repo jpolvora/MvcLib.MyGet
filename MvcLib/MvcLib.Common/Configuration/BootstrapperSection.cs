@@ -37,17 +37,32 @@ namespace MvcLib.Common.Configuration
             private set { _instance = value; }
         }
 
-        [ConfigurationProperty("stopMonitoring", DefaultValue = "true")]
-        public Boolean StopMonitoring
+        [ConfigurationProperty("stopMonitoring", DefaultValue = false)]
+        public bool StopMonitoring
         {
-            get
-            {
-                return (Boolean)this["stopMonitoring"];
-            }
-            set
-            {
-                this["stopMonitoring"] = value;
-            }
+            get { return (Boolean)this["stopMonitoring"]; }
+            set { this["stopMonitoring"] = value; }
+        }
+
+        [ConfigurationProperty("insertroutes", DefaultValue = false)]
+        public bool InsertRoutes
+        {
+            get { return (Boolean)this["insertroutes"]; }
+            set { this["insertroutes"] = value; }
+        }
+
+        [ConfigurationProperty("verbose", DefaultValue = false)]
+        public bool Verbose
+        {
+            get { return (Boolean)this["verbose"]; }
+            set { this["verbose"] = value; }
+        }
+
+        [ConfigurationProperty("traceoutput")]
+        public string TraceOutput
+        {
+            get { return (string)this["traceoutput"]; }
+            set { this["traceoutput"] = value; }
         }
 
         [ConfigurationProperty("httpmodules")]
