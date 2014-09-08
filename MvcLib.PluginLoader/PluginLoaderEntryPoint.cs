@@ -70,18 +70,30 @@ namespace MvcLib.PluginLoader
             var existingAssemblies = PluginFolder.GetFiles("*.dll", SearchOption.AllDirectories);
             var filenames = existingAssemblies.Select(fileInfo => fileInfo.FullName).ToList();
 
-            if (BootstrapperSection.Instance.PluginLoader.DeleteFiles)
+            var cfg = BootstrapperSection.Instance;
+
+            if (cfg.PluginLoader.DeleteFiles)
             {
                 foreach (var filename in filenames)
                 {
                     if (File.Exists(filename))
-                        File.Delete(filename);
+                    {
+                        try
+                        {
+                            File.Delete(filename);
+                        }
+                        catch (Exception ex)
+                        {
+
+                            Trace.TraceError(ex.Message);
+                        }
+                    }
                 }
 
                 filenames.Clear();
             }
 
-            if (BootstrapperSection.Instance.PluginLoader.LoadFromDb)
+            if (cfg.PluginLoader.LoadFromDb)
             {
                 var assemblies = LoadFromDb();
                 var dbAssemblies = WriteToDisk(assemblies);

@@ -84,6 +84,7 @@
     <Compile Include="Configuration\DumpToLocalElement.cs" />
     <Compile Include="Configuration\HttpModulesElement.cs" />
     <Compile Include="Configuration\KompilerElement.cs" />
+    <Compile Include="Configuration\MailConfig.cs" />
     <Compile Include="Configuration\MvcTraceElement.cs" />
     <Compile Include="Configuration\PluginLoaderElementBase.cs" />
     <Compile Include="Configuration\SubFolderVppElement.cs" />

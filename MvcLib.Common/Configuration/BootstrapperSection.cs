@@ -58,7 +58,7 @@ namespace MvcLib.Common.Configuration
             set { this["verbose"] = value; }
         }
 
-        [ConfigurationProperty("traceoutput")]
+        [ConfigurationProperty("traceoutput", DefaultValue = "~/traceoutput.log")]
         public string TraceOutput
         {
             get { return (string)this["traceoutput"]; }
@@ -112,6 +112,13 @@ namespace MvcLib.Common.Configuration
         {
             get { return (VirtualPathProviderElement)this["virtualpathproviders"]; }
             set { this["virtualpathproviders"] = value; }
+        }
+
+        [ConfigurationProperty("mail")]
+        public MailConfig Mail
+        {
+            get { return (MailConfig)this["mail"]; }
+            set { this["mail"] = value; }
         }
     }
 }
