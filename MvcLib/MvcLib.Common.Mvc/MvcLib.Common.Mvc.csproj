@@ -88,6 +88,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomException.cs" />
     <Compile Include="CustomPageBase.cs" />
     <Compile Include="CustomWebViewPage.cs" />
     <Compile Include="ExtJs\ExtJsBase.cs" />

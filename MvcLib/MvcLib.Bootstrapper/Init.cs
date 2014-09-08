@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
+using System.Net.Mime;
 using System.Reflection;
 using System.Web;
 using System.Web.Hosting;
@@ -30,35 +33,33 @@ namespace MvcLib.Bootstrapper
 {
     public class Init
     {
+        private static string _traceFileName;
         private static bool _initialized;
 
         public static void PreStart()
         {
             using (DisposableTimer.StartNew("PRE_START"))
             {
+                var cfg = BootstrapperSection.Initialize();
+
+                //cria um text logger somente para o startup
+                //remove no post start
+                try
+                {
+                    _traceFileName = HostingEnvironment.MapPath(cfg.TraceOutput);
+                    if (File.Exists(_traceFileName))
+                        File.Delete(_traceFileName);
+
+                    var listener = new TextWriterTraceListener(_traceFileName, "StartupListener");
+
+                    Trace.Listeners.Add(listener);
+                }
+                catch { }
+
+
                 var executingAssembly = Assembly.GetExecutingAssembly();
                 Trace.TraceInformation("Entry Assembly: {0}", executingAssembly.GetName().Name);
 
-                var cfg = BootstrapperSection.Initialize();
-
-                if (Debugger.IsAttached || cfg.TraceOutput.IsNotNullOrWhiteSpace())
-                {
-                    try
-                    {
-                        var path = cfg.TraceOutput;
-                        if (!path.StartsWith("~"))
-                            path = "~" + path;
-                        var traceOutput = HostingEnvironment.MapPath(path);
-                        if (File.Exists(traceOutput))
-                            File.Delete(traceOutput);
-
-                        var listener = new TextWriterTraceListener(traceOutput, "StartupListener");
-
-                        Trace.Listeners.Add(listener);
-                        Trace.AutoFlush = true;
-                    }
-                    catch { }
-                }
 
                 if (cfg.HttpModules.Trace.Enabled)
                 {
@@ -120,7 +121,7 @@ namespace MvcLib.Bootstrapper
                     typeof(WebCacheWrapper),
                     typeof(ViewRenderer),
                     typeof(DbToLocal),
-                    typeof(CustomErrorHttpModule.ErrorModel));
+                    typeof(ErrorModel));
 
                 if (cfg.Kompiler.Enabled)
                 {
@@ -194,14 +195,9 @@ namespace MvcLib.Bootstrapper
 
                     foreach (var routeBase in routes)
                     {
-                        var route = (Route) routeBase;
+                        var route = (Route)routeBase;
                         Trace.TraceInformation("Handler: {0} at URL: {1}", route.RouteHandler, route.Url);
                     }
-                }
-
-                if (!Debugger.IsAttached)
-                {
-                    Trace.Listeners.Remove("StartupListener");
                 }
 
                 //viewengine locations
@@ -267,6 +263,37 @@ namespace MvcLib.Bootstrapper
                 else
                 {
                     Trace.TraceInformation("Cannot Configure RazorViewEngine: View Engine not found");
+                }
+
+
+                Trace.Flush();
+                var listener = Trace.Listeners["StartupListener"] as TextWriterTraceListener;
+                if (listener != null)
+                {
+                    listener.Flush();
+                    listener.Close();
+                    Trace.Listeners.Remove(listener);
+                }
+
+                //envia log de startup por email
+
+                try
+                {
+                    if (!File.Exists(_traceFileName)) return;
+                    var txt = File.ReadAllText(_traceFileName);
+                    var body = Environment.NewLine + txt + Environment.NewLine;
+                    using (var client = new SmtpClient())
+                    {
+                        var msg = new MailMessage(cfg.Mail.MailAdmin, cfg.Mail.MailDeveloper, cfg.Mail.MailAdmin + ": Application Start Log", "Attached log.");
+                        msg.Body = body;
+                        msg.IsBodyHtml = false;
+                        //msg.Attachments.Add(new Attachment(_traceFileName));
+                        client.Send(msg);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError(ex.Message);
                 }
             }
         }
